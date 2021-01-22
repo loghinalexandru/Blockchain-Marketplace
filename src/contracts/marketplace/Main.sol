@@ -1,5 +1,6 @@
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.7.3;
-import "../token/YetAnotherEthereumToken.sol";
+import "./../token/YetAnotherEthereumToken.sol";
 
 contract Main {
     
