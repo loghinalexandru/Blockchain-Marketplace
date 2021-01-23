@@ -1,14 +1,14 @@
 pragma solidity ^0.7.3;
 pragma experimental ABIEncoderV2;
-import "./YetAnotherEthereumToken.sol";
+import "../token/YetAnotherEthereumToken.sol";
+import "../token/SafeMath.sol";
 
 contract Main {
-    
+    using SafeMath for uint256;
+
     address private _creator;
     YetAnotherEthereumToken private _token;
     uint256 private _productCount;
-
-    enum State { Created, Development, Finished }
 
     struct Manager {
         string name;
@@ -19,7 +19,6 @@ contract Main {
 
     struct Freelancer {
         string name;
-        uint sum;
         address payable account;
         string expertise;
         bool exists;
@@ -39,14 +38,20 @@ contract Main {
         uint256 amount;
         bool exists;
     }
+
+    struct Application{
+        address payable account;
+        uint256 sum;
+    }
     
     struct Product{
         string description;
-        State start;
         uint256 development_cost;
         uint256 evaluator_reward;
+        uint256 total_sum;
         string expertise;
         address payable manager;
+        bool is_done;
         bool exists;
     }
     
@@ -57,6 +62,8 @@ contract Main {
     mapping(address => Evaluator) private _evaluators;
     mapping(uint256 => Product) private _products;
     mapping(uint256 => mapping(address => Funder)) private _fundersPerProduct;
+    mapping(uint256 => Application[]) private _freelancersPerProduct;
+    mapping(uint256 => Application[]) private _teamPerProduct;
                     
     constructor(address tokenAddress) {
         _creator = msg.sender;
@@ -76,21 +83,65 @@ contract Main {
         _;
     }
 
+    modifier _isFreelancer() {
+        require (_freelancers[msg.sender].exists = true);
+        _;
+    }
+
     //POST
 
     function createProduct(string calldata description, uint256 development_cost, uint256 evaluator_reward, string calldata expertise) public _isManager returns(bool){
-        _products[_productCount] = Product(description, State.Created, development_cost, evaluator_reward, expertise, msg.sender, true);
+        _products[_productCount] = Product(description, development_cost, evaluator_reward, development_cost.add(evaluator_reward), expertise, msg.sender, false, true);
         _productCount = _productCount + 1;
         return true;
     }
 
+    //This needs an approve call for the contract from the UI
     function addFunding(string calldata name, uint256 productIndex, uint256 amount) public returns(bool){
         require(_products[productIndex].exists == true);
+        require(_products[productIndex].total_sum - amount > 0, "Funding goal exceeded!");
 
-        //TODO: Do a check if funder already exists
-        _fundersPerProduct[productIndex][msg.sender] = Funder(name, msg.sender, amount, true);
+        if(_fundersPerProduct[productIndex][msg.sender].exists == true){
+            uint256 currentSum = _fundersPerProduct[productIndex][msg.sender].amount;
+            _fundersPerProduct[productIndex][msg.sender] = Funder(name, msg.sender, currentSum.add(amount), true);
+        }
+        else{
+            _fundersPerProduct[productIndex][msg.sender] = Funder(name, msg.sender, amount, true);
+        }
+
+        _products[productIndex].total_sum = _products[productIndex].total_sum.sub(amount);
 
         return _token.transferFrom(msg.sender, address(this), amount);
+    }
+
+    function withdrawFunding(uint256 productIndex, uint256 amount) public returns(bool){
+        require(_products[productIndex].exists == true);
+        require(_fundersPerProduct[productIndex][msg.sender].exists == true);
+        require(_fundersPerProduct[productIndex][msg.sender].amount >= amount);
+        require(_products[productIndex].total_sum > 0);
+
+        _products[productIndex].total_sum = _products[productIndex].total_sum.add(amount);
+        
+        return _token.transfer(msg.sender, amount);
+    }
+
+    function applyForProduct(uint256 productIndex, uint256 percentage) public _isFreelancer returns(bool){
+        require(_products[productIndex].exists == true);
+        require(_products[productIndex].total_sum <= 0);
+
+        _freelancersPerProduct[productIndex].push(Application(msg.sender, percentage));
+
+        return true;
+    }
+
+    function chooseFreelancer(uint256 productIndex, uint256 applicationIndex) public _isManager returns(bool){
+        require(_products[productIndex].exists == true);
+        require(_products[productIndex].manager == msg.sender);
+        require(_products[productIndex].total_sum <= 0);
+        
+        _teamPerProduct[productIndex].push(_freelancersPerProduct[productIndex][applicationIndex]);
+
+        return true;
     }
 
     //GET
@@ -103,10 +154,40 @@ contract Main {
         return _products[index];
     }
 
+    function getProductState(uint256 index) public view returns(string memory){
+        if(_products[index].total_sum > 0){
+            return "Funding";
+        }
+        else if(_products[index].total_sum == 0){
+            return "Development";
+        }
+        else if(_products[index].is_done == true){
+            return "Completed";
+        }
+        
+        return "Created";
+    }
+
+    function getFreelancer(address freelancer) public view returns(Freelancer memory){
+        return _freelancers[freelancer];
+    }
+
+    function getEvaluator(address evaluator) public view returns(Evaluator memory){
+        return _evaluators[evaluator];
+    }
+
     //Use this to get the index count -> Do item lookup for each index
 
     function getProductCount() public view returns(uint256){
         return _productCount;
+    }
+
+    function getFreelancersPerProduct(uint256 productIndex) public view returns(Application[] memory){
+        return _freelancersPerProduct[productIndex];
+    }
+
+    function getTeamPerProduct(uint256 productIndex) public view returns(Application[] memory){
+        return _teamPerProduct[productIndex];
     }
     
     function isManager() public view returns(bool){
