@@ -1,1 +1,1 @@
-Copy-Item -Path "../src/build/contracts/*" -Destination "src/assets/" -Recurse -Force
+Copy-Item -Path "../src/build/contracts/*" -Destination "src/assets/build" -Recurse -Force

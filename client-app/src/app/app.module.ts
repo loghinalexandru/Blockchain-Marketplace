@@ -15,29 +15,36 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatCardModule } from '@angular/material/card';
 import { MatDialogModule } from '@angular/material/dialog';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { FormsModule } from '@angular/forms';
+import { MatFormFieldModule, MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+
+import {MatNativeDateModule} from '@angular/material/core';
+import { NewProductDialog } from './pages/home/new-product/new-product.dialog';
+
 
 @NgModule({
   declarations: [
     AppComponent,
     ConnectComponent,
     HomeComponent,
-    HeaderComponent
+    HeaderComponent,
+    NewProductDialog
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
     HttpClientModule,
     BrowserAnimationsModule,
-    FormsModule,
     MatButtonModule,
     MatDividerModule,
     MatCardModule,
     MatDialogModule,
     MatFormFieldModule,
-    MatInputModule
+    MatInputModule,
+    ReactiveFormsModule,
+    FormsModule,
+    MatNativeDateModule
   ],
   providers: [
     ContractsService,

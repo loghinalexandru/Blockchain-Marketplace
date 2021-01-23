@@ -1,5 +1,9 @@
 import Web3 from "web3";
+import { Injectable } from "@angular/core";
 
+@Injectable({
+    providedIn: 'root'
+})
 export class Web3Service {
     private _web3: Web3;
 

@@ -38,21 +38,37 @@ export class HomeComponent implements OnInit {
     });
 
     this.contract = this.contractsService.Marketplace;
-    const productCount = await this.contract.getProductcount().call();
+    const productCount = await this.contract.methods.getProductCount().call({ from: this.metaMaskService.user });
 
+    this.contract.methods.getProduct(0).call({ from: this.metaMaskService.user })
+    .then(res => console.log(res))
+    .catch(err => console.log(err));
+
+    this.contract.methods.isManager().call({ from: this.metaMaskService.user })
+    .then(res => console.log(res))
+    .catch(err => console.log(err));
+
+    console.log(productCount);
     //.call({ from: this.metaMaskService.user });
   }
 
   public async onNewProduct(): Promise<void> {
     const dialogRef = this.dialog.open(NewProductDialog, {
+      width: "350px",
       data: {}
     });
-//(string calldata description, uint256 development_cost, uint256 evaluator_reward, string calldata expertise)
-    dialogRef.afterClosed().subscribe(async (res: NewProductData) => {
-      await this.contract
-      .createProduct(res.description, res.developmentCost, res.evaluatorReward, res.description)
-      .call();
-    });
+    //(string calldata description, uint256 development_cost, uint256 evaluator_reward, string calldata expertise)
+    dialogRef.afterClosed()
+      .subscribe(async (res: NewProductData) => {
+        if (res != undefined) {
+          this.contract
+            .methods
+            .createProduct(res.description, res.developmentCost, res.evaluatorReward, res.expetise)
+            .call()
+            .then(res => console.log(res))
+            .catch(err => console.log(err));
+        }
+      });
   }
 
   private get w3(): Web3 {

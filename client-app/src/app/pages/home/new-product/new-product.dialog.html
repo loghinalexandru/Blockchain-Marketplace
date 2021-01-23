@@ -1,26 +1,28 @@
 <h1 mat-dialog-title>Describe your product</h1>
 <div mat-dialog-content>
-    <mat-form-field>
-        <mat-label>Development cost</mat-label>
-        <input matInput
-            [(ngModel)]="data.developmentCost">
-    </mat-form-field>
-    <mat-form-field>
-        <mat-label>Evaluator reward</mat-label>
-        <input matInput
-            [(ngModel)]="data.evaluatorReward">
-    </mat-form-field>
-    <mat-form-field>
-        <mat-label>Expertise</mat-label>
-        <input matInput
-            [(ngModel)]="data.expetise">
-    </mat-form-field>
-    <mat-form-field>
-        <mat-label>Description</mat-label>
-        <textarea matInput
-            [(ngModel)]="data.description">
+    <div class="flex-column">
+        <mat-form-field>
+            <mat-label>Development cost</mat-label>
+            <input matInput
+                [(ngModel)]="data.developmentCost">
+        </mat-form-field>
+        <mat-form-field>
+            <mat-label>Evaluator reward</mat-label>
+            <input matInput
+                [(ngModel)]="data.evaluatorReward">
+        </mat-form-field>
+        <mat-form-field>
+            <mat-label>Expertise</mat-label>
+            <input matInput
+                [(ngModel)]="data.expetise">
+        </mat-form-field>
+        <mat-form-field>
+            <mat-label>Description</mat-label>
+            <textarea matInput
+                [(ngModel)]="data.description">
             </textarea>
-    </mat-form-field>
+        </mat-form-field>
+    </div>
 </div>
 <div mat-dialog-actions>
     <button mat-raised-button
