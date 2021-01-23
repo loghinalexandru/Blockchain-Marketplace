@@ -234,6 +234,7 @@ contract Main {
     }
 
     function notifyManager(uint256 productIndex)public _productExists(productIndex) _isInTeam(productIndex) returns(bool){
+        require(_products[productIndex].state == State.Development, "Product needs to be in development stage!");
         emit NotifyManager(productIndex, msg.sender);
         return true;
     }
