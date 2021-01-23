@@ -14,7 +14,13 @@
     "lib": [
       "es2018",
       "dom"
-    ]
+    ],
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "paths": {
+      "@assets/*": ["src/assets/*"],
+    }
   },
   "angularCompilerOptions": {
     "fullTemplateTypeCheck": true,

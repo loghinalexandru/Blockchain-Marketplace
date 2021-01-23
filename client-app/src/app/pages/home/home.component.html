@@ -1,0 +1,16 @@
+<div class="container">
+  <div class="top">
+    <mat-card>
+      <mat-card-title>Welcome</mat-card-title>
+      <div *ngFor="let account of accounts">
+        <p class="body-1">Balance: {{ account.balance }}</p>
+        <p class="body-1">Hash: {{ account.account }}</p>
+      </div>
+    </mat-card>
+    
+    <button mat-raised-button color="primary" (click)="onNewProduct()">New product</button>
+  </div>
+
+  <div class="top">
+    stuff
+</div>
