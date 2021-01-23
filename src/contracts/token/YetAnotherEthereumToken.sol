@@ -6,4 +6,8 @@ contract YetAnotherEthereumToken is ERC20 {
     constructor() ERC20("YetAnotherEthereumToken",  "YAET"){
         _mint(msg.sender, 1000);
     }
+
+    function buyTokens(uint256 amount) payable public returns(bool){
+        return transfer(msg.sender, amount);
+    }
 }
