@@ -112,17 +112,17 @@ contract Main {
     }
     
     modifier _isManager() {
-        require (_managers[msg.sender].exists = true);
+        require (_managers[msg.sender].exists == true);
         _;
     }
 
     modifier _isFreelancer() {
-        require (_freelancers[msg.sender].exists = true);
+        require (_freelancers[msg.sender].exists == true);
         _;
     }
 
     modifier _isEvaluator() {
-        require (_evaluators[msg.sender].exists = true);
+        require (_evaluators[msg.sender].exists == true);
         _;
     }
 

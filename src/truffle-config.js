@@ -1,4 +1,5 @@
 module.exports = {
+  contracts_build_directory: "../client-app/src/assets/build",
   networks: {
     development: {
       host: "localhost",
