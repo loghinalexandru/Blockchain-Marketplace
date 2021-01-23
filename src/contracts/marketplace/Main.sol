@@ -10,6 +10,8 @@ contract Main {
     YetAnotherEthereumToken private _token;
     uint256 private _productCount;
 
+    enum State {Funding, Development, Done}
+
     struct Manager {
         string name;
         uint reputation;
@@ -96,6 +98,12 @@ contract Main {
         return true;
     }
 
+    function addManager(string calldata name) public returns(bool){
+        _managers[msg.sender] = Manager(name, 5 , msg.sender, true);
+
+        return true;
+    }
+
     //This needs an approve call for the contract from the UI
     function addFunding(string calldata name, uint256 productIndex, uint256 amount) public returns(bool){
         require(_products[productIndex].exists == true);
@@ -154,18 +162,15 @@ contract Main {
         return _products[index];
     }
 
-    function getProductState(uint256 index) public view returns(string memory){
-        if(_products[index].total_sum > 0){
-            return "Funding";
-        }
-        else if(_products[index].total_sum == 0){
-            return "Development";
+    function getProductState(uint256 index) public view returns(State){
+        if(_products[index].total_sum == 0){
+            return State.Development;
         }
         else if(_products[index].is_done == true){
-            return "Completed";
+            return State.Done;
         }
-        
-        return "Created";
+
+        return State.Funding;
     }
 
     function getFreelancer(address freelancer) public view returns(Freelancer memory){
