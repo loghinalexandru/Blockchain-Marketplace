@@ -60,11 +60,10 @@ contract Main {
         string expertise;
         address payable manager;
         address payable evaluator;
+        address payable[] funders;
         bool is_done;
         bool exists;
     }
-    
-    address[] addresses;
     
     mapping(address => Manager) private _managers;
     mapping(address => Freelancer) private _freelancers;
@@ -82,7 +81,6 @@ contract Main {
     
     function _init() private{
         _managers[msg.sender] = Manager("Alex", 5, payable(msg.sender), true);
-        addresses.push(msg.sender);
     }
 
     //Modifiers
@@ -142,6 +140,9 @@ contract Main {
         if(_products[productIndex].state == State.Evaluating){
             _token.transfer(_products[productIndex].evaluator, _products[productIndex].evaluator_reward);
         }
+        else if(_products[productIndex].state == State.Development){
+            _token.transfer(_products[productIndex].manager, _products[productIndex].evaluator_reward);
+        }
 
         return true;
     }
@@ -159,8 +160,25 @@ contract Main {
     //POST
 
     function createProduct(string calldata description, uint256 development_cost, uint256 evaluator_reward, string calldata expertise) public _isManager returns(bool){
-        _products[_productCount] = Product(description, State.Funding, development_cost, evaluator_reward, development_cost.add(evaluator_reward), development_cost, expertise, msg.sender, address(0), false, true);
+        _products[_productCount] = Product(description, State.Funding, development_cost, evaluator_reward, development_cost.add(evaluator_reward), development_cost, expertise, msg.sender, address(0), new address payable[](0), false, true);
         _productCount = _productCount + 1;
+        return true;
+    }
+
+    function deleteProduct(uint256 productIndex) public _isManager returns(bool){
+        require(_products[productIndex].state == State.Funding);
+        require(_products[productIndex].manager == msg.sender);
+
+        for(uint i = 0; i < _products[productIndex].funders.length; i++) {
+            if(_fundersPerProduct[productIndex][_products[productIndex].funders[i]].amount > 0){
+                _token.transfer(_fundersPerProduct[productIndex][_products[productIndex].funders[i]].account, _fundersPerProduct[productIndex][_products[productIndex].funders[i]].amount);
+            }
+        }
+
+        _productCount = _productCount - 1;
+
+        delete _products[productIndex];
+
         return true;
     }
 
@@ -196,6 +214,7 @@ contract Main {
         }
         else{
             _fundersPerProduct[productIndex][msg.sender] = Funder(name, msg.sender, amount, true);
+            _products[productIndex].funders.push(msg.sender);
         }
 
         _products[productIndex].remaining_funding = _products[productIndex].remaining_funding.sub(amount);
@@ -325,12 +344,16 @@ contract Main {
         return _productCount;
     }
 
-    function getFreelancersPerProduct(uint256 productIndex) public view returns(Application[] memory){
+    function getFreelancersPerProduct(uint256 productIndex) public _productExists(productIndex) view returns(Application[] memory){
         return _freelancersPerProduct[productIndex];
     }
 
-    function getTeamPerProduct(uint256 productIndex) public view returns(Application[] memory){
+    function getTeamPerProduct(uint256 productIndex) public _productExists(productIndex) view returns(Application[] memory){
         return _teamPerProduct[productIndex];
+    }
+
+    function getFundersPerProduct(uint256 productIndex)public _productExists(productIndex) view returns(address payable[] memory){
+        return _products[productIndex].funders;
     }
     
     function isManager() public view returns(bool){
@@ -344,5 +367,4 @@ contract Main {
     function isEvaluator() public view returns(bool){
         return _evaluators[msg.sender].exists;
     }
-    
 }
