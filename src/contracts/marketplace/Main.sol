@@ -8,6 +8,7 @@ contract Main {
 
     //Events
     event RequiresEvaluation(uint256 productIndex);
+    event NotifyManager(uint256 productIndex, address freelancer);
 
     address private _creator;
     YetAnotherEthereumToken private _token;
@@ -72,7 +73,7 @@ contract Main {
     mapping(uint256 => mapping(address => Funder)) private _fundersPerProduct;
     mapping(uint256 => Application[]) private _freelancersPerProduct;
     mapping(uint256 => Application[]) private _teamPerProduct;
-                    
+
     constructor(address tokenAddress) {
         _creator = msg.sender;
         _token = YetAnotherEthereumToken(tokenAddress);
@@ -84,16 +85,29 @@ contract Main {
     }
 
     //Modifiers
-
     modifier _productExists(uint256 productIndex){
         require(_products[productIndex].exists == true, "Product with specified index does not exist!");
         _;
     }
 
-    modifier _noRole(address user){
-        require(_managers[user].exists == false, "User is already manager!");
-        require(_freelancers[user].exists == false, "User is already freelancer!");
-        require(_evaluators[user].exists == false, "User is already evaluator!");
+    modifier _noRole(){
+        require(_managers[msg.sender].exists == false, "User is already manager!");
+        require(_freelancers[msg.sender].exists == false, "User is already freelancer!");
+        require(_evaluators[msg.sender].exists == false, "User is already evaluator!");
+        _;
+    }
+
+    modifier _isInTeam(uint256 productIndex){
+        bool isInTeam = false;
+        for (uint i = 0; i < _teamPerProduct[productIndex].length; i++) {
+            if(_teamPerProduct[productIndex][i].account == msg.sender){
+                isInTeam = true;
+                break;
+            }
+        }
+
+        require(isInTeam, "User is not in the product development team!");
+
         _;
     }
     
@@ -113,12 +127,10 @@ contract Main {
     }
 
     //Helpers
-
     function decreaseReputation(uint currentReputation) private pure returns(uint){
         if(currentReputation == 1){
             return 1;
         }
-
         return currentReputation - 1;
     }
 
@@ -126,7 +138,6 @@ contract Main {
         if(currentReputation == 10){
             return 10;
         }
-
         return currentReputation + 1;
     }
 
@@ -156,9 +167,7 @@ contract Main {
             _products[productIndex].state = State.Development;
         }
     }
-
     //POST
-
     function createProduct(string calldata description, uint256 development_cost, uint256 evaluator_reward, string calldata expertise) public _isManager returns(bool){
         _products[_productCount] = Product(description, State.Funding, development_cost, evaluator_reward, development_cost.add(evaluator_reward), development_cost, expertise, msg.sender, address(0), new address payable[](0), false, true);
         _productCount = _productCount + 1;
@@ -182,21 +191,21 @@ contract Main {
         return true;
     }
 
-    function addFreelancer(string calldata name, string calldata expertise) public _noRole(msg.sender) returns(bool){
+    function addFreelancer(string calldata name, string calldata expertise) public _noRole returns(bool){
         require(_freelancers[msg.sender].exists == false);
         _freelancers[msg.sender] = Freelancer(name, 5, msg.sender, expertise, true);
 
         return true;
     }
 
-    function addEvaluator(string calldata name, string calldata expertise) public _noRole(msg.sender) returns(bool){
+    function addEvaluator(string calldata name, string calldata expertise) public _noRole returns(bool){
         require(_evaluators[msg.sender].exists == false);
         _evaluators[msg.sender] = Evaluator(name, 5, msg.sender, expertise, true);
 
         return true;
     }
 
-    function addManager(string calldata name) public _noRole(msg.sender) returns(bool){
+    function addManager(string calldata name) public _noRole returns(bool){
         require(_managers[msg.sender].exists == false);
         _managers[msg.sender] = Manager(name, 5, msg.sender, true);
 
@@ -222,6 +231,11 @@ contract Main {
         changeProductState(productIndex);
 
         return _token.transferFrom(msg.sender, address(this), amount);
+    }
+
+    function notifyManager(uint256 productIndex)public _productExists(productIndex) _isInTeam(productIndex) returns(bool){
+        emit NotifyManager(productIndex, msg.sender);
+        return true;
     }
 
     function withdrawFunding(uint256 productIndex, uint256 amount) public _productExists(productIndex) returns(bool){
@@ -315,9 +329,7 @@ contract Main {
 
         return true;
     }
-
     //GET
-
     function getBalance(address owner) public view returns(uint256){
         return _token.balanceOf(owner);
     }
@@ -339,7 +351,6 @@ contract Main {
     }
 
     //Use this to get the index count -> Do item lookup for each index
-
     function getProductCount() public view returns(uint256){
         return _productCount;
     }
