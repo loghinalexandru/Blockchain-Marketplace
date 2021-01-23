@@ -65,9 +65,7 @@ contract Main {
     }
     
     function _init() private{
-        _token.buyTokens(msg.sender, 100);
         _managers[msg.sender] = Manager("Alex", 5, payable(msg.sender), true);
-        
         addresses.push(msg.sender);
     }
 
@@ -110,4 +108,17 @@ contract Main {
     function getProductCount() public view returns(uint256){
         return _productCount;
     }
+    
+    function isManager() public view returns(bool){
+        return _managers[msg.sender].exists;
+    }
+
+    function isFreelancer() public view returns(bool){
+        return _freelancers[msg.sender].exists;
+    }
+
+    function isEvaluator() public view returns(bool){
+        return _evaluators[msg.sender].exists;
+    }
+    
 }

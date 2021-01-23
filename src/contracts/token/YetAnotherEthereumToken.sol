@@ -4,10 +4,11 @@ import "./ERC20.sol";
 
 contract YetAnotherEthereumToken is ERC20 {
     constructor() ERC20("YetAnotherEthereumToken",  "YAET"){
-        _mint(msg.sender, 1000);
+        _mint(address(this), 1000);
     }
 
-    function buyTokens(uint256 amount) payable public returns(bool){
-        return transfer(msg.sender, amount);
+    function buyTokens(address recipient, uint256 amount) payable public returns(bool){
+        this.approve(recipient, amount);
+        return transferFrom(address(this), recipient, amount);
     }
 }
