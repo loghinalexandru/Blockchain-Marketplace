@@ -15,9 +15,23 @@
     <p class="body-2">{{product.remaining_development_funding}}</p>
     <mat-divider></mat-divider>
     <p class="mat-body-strong">Needed funds</p>
-    <p class="body-2">{{product.remaining_funding}}</p>
+    <div class="flex-row">
+        <p class="body-2">{{product.remaining_funding}}</p>
+        <button *ngIf="canFund"
+        mat-raised-button
+            color="accent">Fund</button>
+    </div>
     <mat-divider></mat-divider>
     <p class="mat-body-strong">State</p>
     <p class="body-2">{{state}}</p>
     <mat-divider></mat-divider>
+    <div>
+        <button *ngIf="canJoinAsFreelancer"
+            mat-raised-button
+            class="green">Join as freelancer</button>
+        <button *ngIf="canJoinAsEvaluator"
+            mat-raised-button
+            color="primary"> Join as evaluator</button>
+        <button *ngIf="canSubmit">Submit</button>
+    </div>
 </mat-card>

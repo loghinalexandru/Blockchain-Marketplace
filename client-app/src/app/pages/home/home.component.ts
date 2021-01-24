@@ -59,7 +59,6 @@ export class HomeComponent implements OnInit {
     this.isManager = await C_CALL<boolean>(this.snackBar, this.marketplace, "isManager",[]);
     this.isFreelancer = await C_CALL<boolean>(this.snackBar, this.marketplace, "isFreelancer",[]);
     this.isEvaluator = await C_CALL<boolean>(this.snackBar, this.marketplace, "isEvaluator",[]);;
-    console.log(this.isManager, this.isFreelancer, this.isEvaluator);
 
     for (let i = 0; i < productCount; i++) {
       const product = await C_CALL<number>(this.snackBar, this.marketplace, "getProduct",[i]);
@@ -78,10 +77,9 @@ export class HomeComponent implements OnInit {
     });
     dialogRef.afterClosed()
       .subscribe(async (res: number) => {
-        if (res == undefined) {
-          alert("Invalid input");
+        if (res != undefined) {
+          await C_TRANSACT(this.snackBar, this.tokens, "buyTokens",[this.metaMaskService.user, res]);
         }
-        await C_TRANSACT(this.snackBar, this.tokens, "buyTokens",[this.metaMaskService.user, res]);
       });
   }
 

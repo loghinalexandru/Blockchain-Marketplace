@@ -61,7 +61,10 @@
     <div class="top">
       <div *ngFor="let product of products">
         <app-product *ngIf="product.state == group.value"
-          [product]=product></app-product>
+          [product]=product
+          [isManager]=isManager
+          [isFreelancer]=isFreelancer
+          [isEvaluator]=isEvaluator></app-product>
       </div>
     </div>
   </div>

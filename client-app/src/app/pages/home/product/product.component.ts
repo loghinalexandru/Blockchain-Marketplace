@@ -10,14 +10,18 @@ export class ProductComponent implements OnInit {
 
   @Input()
   public product: Product;
+  @Input()
   public isManager: boolean;
+  @Input()
   public isFreelancer: boolean;
+  @Input()
   public isEvaluator: boolean;
 
   constructor() { }
 
   ngOnInit(): void {
     console.log(this.product);
+    console.log(this.isManager, this.isFreelancer, this.isEvaluator);
   }
 
   private states = {
@@ -30,7 +34,22 @@ export class ProductComponent implements OnInit {
   };
 
   public get state(): string {
-    const res = this.states[this.product.state] ?? "Something is wrong";
-    return res;
+    return this.states[this.product.state] ?? "Something is wrong";
+  }
+
+  public get canJoinAsFreelancer(): boolean {
+    return this.product.state == 1;
+  }
+
+  public get canSubmit():boolean {
+    return this.product.state == 2 && this.isFreelancer;
+  }
+
+  public get canJoinAsEvaluator(): boolean {
+    return this.product.evaluator === "0x0000000000000000000000000000000000000000" && this.product.state == 1;
+  }
+
+  public get canFund():boolean {
+    return this.product.state == 0;
   }
 }
