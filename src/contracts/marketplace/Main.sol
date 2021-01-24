@@ -51,6 +51,8 @@ contract Main {
     struct Application{
         address payable account;
         uint256 sum;
+        string expertise;
+        bool approved;
     }
     
     struct Product{
@@ -75,6 +77,7 @@ contract Main {
     mapping(uint256 => mapping(address => Funder)) private _fundersPerProduct;
     mapping(uint256 => Application[]) private _freelancersPerProduct;
     mapping(uint256 => Application[]) private _teamPerProduct;
+    mapping(uint256 => mapping(address => bool)) private _applicationPerFreelancer;
 
     constructor(address tokenAddress) {
         _creator = msg.sender;
@@ -89,6 +92,11 @@ contract Main {
     //Modifiers
     modifier _productExists(uint256 productIndex){
         require(_products[productIndex].exists == true, "Product with specified index does not exist!");
+        _;
+    }
+
+    modifier _applicationExists(uint256 productIndex, uint256 applicationIndex){
+        require(_freelancersPerProduct[productIndex][applicationIndex].account != address(0), "Freelancer application with specified index does not exist!");
         _;
     }
 
@@ -165,7 +173,7 @@ contract Main {
         if(_products[productIndex].remaining_funding == 0){
             _products[productIndex].state = State.Teaming;
         }
-        else if(_products[productIndex].remaining_development_funding == 0 && _products[productIndex].state == State.Funding){
+        else if(_products[productIndex].remaining_development_funding == 0 && _products[productIndex].state == State.Teaming){
             _products[productIndex].state = State.Development;
         }
     }
@@ -216,6 +224,7 @@ contract Main {
     function addFunding(string calldata name, uint256 productIndex, uint256 amount) public _productExists(productIndex) returns(bool){
         require(_products[productIndex].state == State.Funding,  "Funding stage ended!");
         require(_products[productIndex].remaining_funding >= amount, "Funding goal exceeded!");
+        require(amount > 0);
 
         if(_fundersPerProduct[productIndex][msg.sender].exists == true){
             uint256 currentSum = _fundersPerProduct[productIndex][msg.sender].amount;
@@ -253,8 +262,11 @@ contract Main {
     function applyForProduct(uint256 productIndex, uint256 sum) public _productExists(productIndex) _isFreelancer returns(bool){
         require(_products[productIndex].state == State.Teaming);
         require(_products[productIndex].development_cost >= sum);
-        
-        _freelancersPerProduct[productIndex].push(Application(msg.sender, sum));
+        require(sum > 0);
+        require(_applicationPerFreelancer[productIndex][msg.sender] == false);
+
+        _freelancersPerProduct[productIndex].push(Application(msg.sender, sum, _freelancers[msg.sender].expertise, false));
+        _applicationPerFreelancer[productIndex][msg.sender] = true;
         return true;
     }
 
@@ -265,13 +277,16 @@ contract Main {
         return true;
     }
 
-    function chooseFreelancer(uint256 productIndex, uint256 applicationIndex) public _isManager _productExists(productIndex) returns(bool){
+    function chooseFreelancer(uint256 productIndex, uint256 applicationIndex) public _isManager _productExists(productIndex) _applicationExists(productIndex, applicationIndex) returns(bool){
         require(_products[productIndex].manager == msg.sender);
         require(_products[productIndex].state == State.Teaming);
         require(_freelancersPerProduct[productIndex][applicationIndex].sum <= _products[productIndex].remaining_development_funding);
+        require(_freelancersPerProduct[productIndex][applicationIndex].approved == false);
 
         _products[productIndex].remaining_development_funding = _products[productIndex].remaining_development_funding.sub(_freelancersPerProduct[productIndex][applicationIndex].sum);
+        _freelancersPerProduct[productIndex][applicationIndex].approved = true;
         _teamPerProduct[productIndex].push(_freelancersPerProduct[productIndex][applicationIndex]);
+
         changeProductState(productIndex);
         return true;
     }
