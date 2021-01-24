@@ -10,6 +10,7 @@ import { FundDialog } from './fund-dialog/fund.dialog';
 import { JoinFreelancerDialog } from './join-freelancer/join-freelancer.dialog';
 import { Product } from './interfaces/product';
 import { Freelancer, FreelancerKeys } from './interfaces/freelancer';
+import { ViewApplicantsDialog } from './view-applicants/view-applicants.dialog';
 
 @Component({
   selector: 'app-product',
@@ -36,6 +37,8 @@ export class ProductComponent implements OnInit {
     this.userService.userObservable().subscribe((user: Account) => this.zone.run(() => this.user = user));
   }
   async ngOnInit(): Promise<void> {
+    console.log(this.product);
+    
     const freelancers: [] = await C_CALL(this.snackBar, this.contractsService.Marketplace, "getFreelancersPerProduct", [this.productIndex]);
     this.freelancers = freelancers.map((freelancer: []) => {
       const f = FreelancerKeys.reduce((obj, key) => {
@@ -83,6 +86,10 @@ export class ProductComponent implements OnInit {
     return this.product.state == 0;
   }
 
+  public get canViewApplicants(): boolean {
+    return this.user.isManager && this.user.address.toLowerCase() == this.product.manager.toLowerCase();
+  }
+
   public onFund(): void {
     const dialogRef = this.dialog.open(FundDialog, {
       data: {}
@@ -121,5 +128,15 @@ export class ProductComponent implements OnInit {
   public async onJoinEvaluator(): Promise<void> {
     await C_TRANSACT(this.snackBar, this.contractsService.Marketplace, "applyForProductEvaluation", [this.productIndex]);
     await this.productNotifierService.notify(this.productIndex);
+  }
+
+  public onViewApplications(): void {
+    const dialogRef = this.dialog.open(ViewApplicantsDialog, {
+      width: "80%",
+      data: {
+        productIndex: this.productIndex,
+        freelancers: this.freelancers
+      }
+    });
   }
 }
