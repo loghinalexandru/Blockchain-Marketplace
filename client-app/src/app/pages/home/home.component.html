@@ -69,7 +69,8 @@
       </mat-button-toggle-group>
     </div>
     <div class="top">
-      <div *ngFor="let product of products; index as i" class="margin">
+      <div *ngFor="let product of products; index as i"
+        class="margin">
         <app-product *ngIf="product.state == group.value"
           [product]=product
           [productIndex]=i></app-product>

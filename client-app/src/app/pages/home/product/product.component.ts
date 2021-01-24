@@ -10,6 +10,7 @@ import { FundDialog } from './fund-dialog/fund.dialog';
 import { JoinFreelancerDialog } from './join-freelancer/join-freelancer.dialog';
 import { Product } from './interfaces/product';
 import { Freelancer, FreelancerKeys } from './interfaces/freelancer';
+import { ViewApplicantsDialog } from './view-applicants/view-applicants.dialog';
 
 @Component({
   selector: 'app-product',
@@ -36,7 +37,12 @@ export class ProductComponent implements OnInit {
     this.userService.userObservable().subscribe((user: Account) => this.zone.run(() => this.user = user));
   }
   async ngOnInit(): Promise<void> {
-    const freelancers: [] = await C_CALL(this.snackBar, this.contractsService.Marketplace, "getFreelancersPerProduct", [this.productIndex]);
+    let freelancers: [];
+    if (this.product.state == 1) {
+      freelancers = await C_CALL(this.snackBar, this.contractsService.Marketplace, "getFreelancersPerProduct", [this.productIndex]);
+    }else{
+      freelancers = await C_CALL(this.snackBar, this.contractsService.Marketplace, "getTeamPerProduct", [this.productIndex]);
+    }
     this.freelancers = freelancers.map((freelancer: []) => {
       const f = FreelancerKeys.reduce((obj, key) => {
         obj[key] = freelancer[key];
@@ -72,7 +78,9 @@ export class ProductComponent implements OnInit {
   }
 
   public get canSubmit(): boolean {
-    return this.product.state == 2 && this.user.isFreelancer;
+    return this.product.state == 2 
+    && this.user.isFreelancer 
+    && this.freelancers.findIndex(f => f.account.toLowerCase() == this.user.address.toLowerCase()) > -1;
   }
 
   public get canJoinAsEvaluator(): boolean {
@@ -81,6 +89,10 @@ export class ProductComponent implements OnInit {
 
   public get canFund(): boolean {
     return this.product.state == 0;
+  }
+
+  public get canViewApplicants(): boolean {
+    return this.user.isManager && this.user.address.toLowerCase() == this.product.manager.toLowerCase();
   }
 
   public onFund(): void {
@@ -120,6 +132,23 @@ export class ProductComponent implements OnInit {
 
   public async onJoinEvaluator(): Promise<void> {
     await C_TRANSACT(this.snackBar, this.contractsService.Marketplace, "applyForProductEvaluation", [this.productIndex]);
+    await this.productNotifierService.notify(this.productIndex);
+  }
+
+  public onViewApplications(): void {
+    const dialogRef = this.dialog.open(ViewApplicantsDialog, {
+      width: "80%",
+      data: {
+        productIndex: this.productIndex,
+        freelancers: this.freelancers
+      }
+    });
+    dialogRef.afterClosed()
+      .subscribe(_ => this.productNotifierService.notify(this.productIndex));
+  }
+
+  public async onSubmit(): Promise<void> {
+    await C_TRANSACT(this.snackBar, this.contractsService.Marketplace, "notifyManager", [this.productIndex]);
     await this.productNotifierService.notify(this.productIndex);
   }
 }

@@ -31,6 +31,8 @@ import { FundDialog } from './pages/home/product/fund-dialog/fund.dialog';
 import { ProductNotifierService } from './services/services/product-notifier.service';
 import { UserService } from './services/services/user.service';
 import { JoinFreelancerDialog } from './pages/home/product/join-freelancer/join-freelancer.dialog';
+import { ViewApplicantsDialog } from './pages/home/product/view-applicants/view-applicants.dialog';
+import { MatTableModule } from '@angular/material/table';
 
 @NgModule({
   declarations: [
@@ -44,7 +46,8 @@ import { JoinFreelancerDialog } from './pages/home/product/join-freelancer/join-
     NewRoleExpertiseDialog,
     FundDialog,
     ProductComponent,
-    JoinFreelancerDialog
+    JoinFreelancerDialog,
+    ViewApplicantsDialog
   ],
   imports: [
     BrowserModule,
@@ -61,7 +64,8 @@ import { JoinFreelancerDialog } from './pages/home/product/join-freelancer/join-
     FormsModule,
     MatNativeDateModule,
     MatButtonToggleModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    MatTableModule
   ],
   providers: [
     ContractsService,
