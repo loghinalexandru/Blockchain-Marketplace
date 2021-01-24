@@ -13,19 +13,17 @@
     <mat-divider></mat-divider>
     <p class="mat-body-strong">Development reward</p>
     <p class="body-2">{{product.remaining_development_funding}}</p>
-    <mat-divider></mat-divider>
-    <p class="mat-body-strong">Needed funds</p>
-    <div class="flex-row">
-        <p class="body-2">{{product.remaining_funding}}</p>
-        <button *ngIf="canFund"
-            (click)="onFund()"
-            mat-raised-button
-            color="accent">Fund</button>
+    <div *ngIf="product.state == 0">
+        <mat-divider></mat-divider>
+        <p class="mat-body-strong">Needed funds</p>
+        <div class="flex-row">
+            <p class="body-2">{{product.remaining_funding}}</p>
+            <button *ngIf="canFund"
+                (click)="onFund()"
+                mat-raised-button
+                color="accent">Fund</button>
+        </div>
     </div>
-    <mat-divider></mat-divider>
-    <p class="mat-body-strong">State</p>
-    <p class="body-2">{{state}}</p>
-    <mat-divider></mat-divider>
     <div>
         <div *ngIf="alreadyJoined">✅ Pending Approval </div>
         <div *ngIf="alreadyEvaluator">✅ Joined </div>
