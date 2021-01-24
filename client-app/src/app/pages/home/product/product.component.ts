@@ -1,4 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
+import { Account, UserService } from 'src/app/services/services/user.service';
 import { Product } from './product';
 
 @Component({
@@ -6,22 +7,15 @@ import { Product } from './product';
   templateUrl: './product.component.html',
   styleUrls: ['./product.component.scss']
 })
-export class ProductComponent implements OnInit {
+export class ProductComponent {
+
+  public user: Account;
 
   @Input()
   public product: Product;
-  @Input()
-  public isManager: boolean;
-  @Input()
-  public isFreelancer: boolean;
-  @Input()
-  public isEvaluator: boolean;
 
-  constructor() { }
-
-  ngOnInit(): void {
-    console.log(this.product);
-    console.log(this.isManager, this.isFreelancer, this.isEvaluator);
+  constructor(private readonly userService: UserService) {
+    userService.userObservable().subscribe((user: Account) => this.user = user);
   }
 
   private states = {
@@ -41,15 +35,15 @@ export class ProductComponent implements OnInit {
     return this.product.state == 1;
   }
 
-  public get canSubmit():boolean {
-    return this.product.state == 2 && this.isFreelancer;
+  public get canSubmit(): boolean {
+    return this.product.state == 2 && this.user.isFreelancer;
   }
 
   public get canJoinAsEvaluator(): boolean {
     return this.product.evaluator === "0x0000000000000000000000000000000000000000" && this.product.state == 1;
   }
 
-  public get canFund():boolean {
+  public get canFund(): boolean {
     return this.product.state == 0;
   }
 }

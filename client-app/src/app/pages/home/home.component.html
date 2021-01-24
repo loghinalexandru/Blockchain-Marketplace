@@ -1,20 +1,30 @@
 <div class="top">
   <mat-card>
     <mat-card-title>Welcome</mat-card-title>
-    <div *ngFor="let account of accounts">
-      <p class="body-1">Balance: {{ account.balance }}</p>
-      <p class="body-1">Hash: {{ account.account }}</p>
-      <div class="top slim">
-        <p class="body-1">Tokens: {{ account.tokens }}</p>
-        <button mat-raised-button
-          color="warn"
-          (click)="onBuyTokens()">Buy tokens</button>
+    <div>
+      <p class="body-1">Balance: {{ user.balance }}</p>
+      <p class="body-1">Address: {{ user.address }}</p>
+      <div>
+        <div class="top slim">
+          <p class="body-1">Tokens: {{ user.tokens }}</p>
+          <button mat-raised-button
+            color="warn"
+            class="token-btn"
+            (click)="onBuyTokens()">Buy tokens</button>
+        </div>
+        <div class="top slim">
+          <p class="body-1">Allowance: {{ user.allowance }}</p>
+          <button mat-raised-button
+            color="warn"
+            class="token-btn"
+            (click)="onAddAllowance()">Set allowance</button>
+        </div>
       </div>
     </div>
   </mat-card>
-  <div *ngIf="!hasRole || isManager"
-  class="flex-column margin">
-    <button *ngIf="isManager"
+  <div *ngIf="!hasRole || user.isManager"
+    class="flex-column margin">
+    <button *ngIf="user.isManager"
       mat-raised-button
       color="primary"
       (click)="onNewProduct()">New product</button>
@@ -61,10 +71,7 @@
     <div class="top">
       <div *ngFor="let product of products">
         <app-product *ngIf="product.state == group.value"
-          [product]=product
-          [isManager]=isManager
-          [isFreelancer]=isFreelancer
-          [isEvaluator]=isEvaluator></app-product>
+          [product]=product></app-product>
       </div>
     </div>
   </div>

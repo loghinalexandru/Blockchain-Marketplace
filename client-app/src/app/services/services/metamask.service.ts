@@ -1,4 +1,5 @@
 import { Injectable } from "@angular/core";
+import { BehaviorSubject, Observable } from "rxjs";
 import { Web3Service } from "./web3.service";
 
 @Injectable({
@@ -6,18 +7,12 @@ import { Web3Service } from "./web3.service";
 })
 export class MetaMaskService {
 
-    constructor(private readonly w3: Web3Service) {
+    private userHashSubject: BehaviorSubject<string> = new BehaviorSubject<string>("");
 
-    }
-
-    private userHash: string = "";
+    constructor(private readonly w3: Web3Service) {}
 
     public get isConnected(): boolean {
         return window['ethereum'].isConnected();
-    }
-
-    public get user(): string {
-        return this.userHash;
     }
 
     public async connect(): Promise<boolean> {
@@ -34,12 +29,16 @@ export class MetaMaskService {
             window['ethereum']
                 .send('eth_requestAccounts')
                 .then(accs => {
-                    this.userHash = accs.result[0];
-                    console.log("Connected user:", this.userHash);
                     this.w3.init();
+                    this.userHashSubject.next(accs.result[0]);
+                    console.log("Connected user:", accs.result[0]);
                     resolve(true);
                 })
                 .catch(err => { alert("please login"); resolve(false); });
         });
+    }
+
+    public userObservable(): Observable<string> {
+        return this.userHashSubject.asObservable();
     }
 }
