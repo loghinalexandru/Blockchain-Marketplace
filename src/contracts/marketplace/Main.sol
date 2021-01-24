@@ -9,12 +9,14 @@ contract Main {
     //Events
     event RequiresEvaluation(uint256 productIndex);
     event NotifyManager(uint256 productIndex, address freelancer);
+    event ProductAdded(uint256 productIndex);
+    event ProductDeleted(uint256 productIndex);
 
     address private _creator;
     YetAnotherEthereumToken private _token;
     uint256 private _productCount;
 
-    enum State {Funding, Teaming, Development, Evaluating, Done}
+    enum State {Funding, Teaming, Development, ManagerApproval, Evaluating, Done}
 
     struct Manager {
         string name;
@@ -151,7 +153,7 @@ contract Main {
         if(_products[productIndex].state == State.Evaluating){
             _token.transfer(_products[productIndex].evaluator, _products[productIndex].evaluator_reward);
         }
-        else if(_products[productIndex].state == State.Development){
+        else if(_products[productIndex].state == State.ManagerApproval){
             _token.transfer(_products[productIndex].manager, _products[productIndex].evaluator_reward);
         }
 
@@ -170,6 +172,7 @@ contract Main {
     //POST
     function createProduct(string calldata description, uint256 development_cost, uint256 evaluator_reward, string calldata expertise) public _isManager returns(bool){
         _products[_productCount] = Product(description, State.Funding, development_cost, evaluator_reward, development_cost.add(evaluator_reward), development_cost, expertise, msg.sender, address(0), new address payable[](0), false, true);
+        emit ProductAdded(_productCount);
         _productCount = _productCount + 1;
         return true;
     }
@@ -183,30 +186,27 @@ contract Main {
                 _token.transfer(_fundersPerProduct[productIndex][_products[productIndex].funders[i]].account, _fundersPerProduct[productIndex][_products[productIndex].funders[i]].amount);
             }
         }
-
+        
+        emit ProductDeleted(productIndex);
         _productCount = _productCount - 1;
-
         delete _products[productIndex];
 
         return true;
     }
 
     function addFreelancer(string calldata name, string calldata expertise) public _noRole returns(bool){
-        require(_freelancers[msg.sender].exists == false);
         _freelancers[msg.sender] = Freelancer(name, 5, msg.sender, expertise, true);
 
         return true;
     }
 
     function addEvaluator(string calldata name, string calldata expertise) public _noRole returns(bool){
-        require(_evaluators[msg.sender].exists == false);
         _evaluators[msg.sender] = Evaluator(name, 5, msg.sender, expertise, true);
 
         return true;
     }
 
     function addManager(string calldata name) public _noRole returns(bool){
-        require(_managers[msg.sender].exists == false);
         _managers[msg.sender] = Manager(name, 5, msg.sender, true);
 
         return true;
@@ -233,8 +233,9 @@ contract Main {
         return _token.transferFrom(msg.sender, address(this), amount);
     }
 
-    function notifyManager(uint256 productIndex)public _productExists(productIndex) _isInTeam(productIndex) returns(bool){
+    function notifyManager(uint256 productIndex)public _productExists(productIndex) _isInTeam(productIndex) _productExists(productIndex) returns(bool){
         require(_products[productIndex].state == State.Development, "Product needs to be in development stage!");
+        _products[productIndex].state = State.ManagerApproval;
         emit NotifyManager(productIndex, msg.sender);
         return true;
     }
@@ -251,18 +252,14 @@ contract Main {
 
     function applyForProduct(uint256 productIndex, uint256 sum) public _productExists(productIndex) _isFreelancer returns(bool){
         require(_products[productIndex].state == State.Teaming);
-
         _freelancersPerProduct[productIndex].push(Application(msg.sender, sum));
-
         return true;
     }
 
     function applyForProductEvaluation(uint256 productIndex) public _isEvaluator _productExists(productIndex) returns(bool){
         require(_products[productIndex].state == State.Teaming);
         require(_products[productIndex].evaluator == address(0));
-
         _products[productIndex].evaluator = msg.sender;
-
         return true;
     }
 
@@ -273,15 +270,13 @@ contract Main {
 
         _products[productIndex].remaining_development_funding = _products[productIndex].remaining_development_funding.sub(_freelancersPerProduct[productIndex][applicationIndex].sum);
         _teamPerProduct[productIndex].push(_freelancersPerProduct[productIndex][applicationIndex]);
-        
         changeProductState(productIndex);
-
         return true;
     }
 
     function acceptProduct(bool accepted, uint256 productIndex) public _isManager _productExists(productIndex) returns(bool){
         require(_products[productIndex].manager == msg.sender);
-        require(_products[productIndex].state == State.Development);
+        require(_products[productIndex].state == State.ManagerApproval);
 
         if(accepted){
             distributeFunds(productIndex);
