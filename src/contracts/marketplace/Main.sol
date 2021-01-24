@@ -173,7 +173,7 @@ contract Main {
         if(_products[productIndex].remaining_funding == 0){
             _products[productIndex].state = State.Teaming;
         }
-        else if(_products[productIndex].remaining_development_funding == 0 && _products[productIndex].state == State.Funding){
+        else if(_products[productIndex].remaining_development_funding == 0 && _products[productIndex].state == State.Teaming){
             _products[productIndex].state = State.Development;
         }
     }
@@ -224,6 +224,7 @@ contract Main {
     function addFunding(string calldata name, uint256 productIndex, uint256 amount) public _productExists(productIndex) returns(bool){
         require(_products[productIndex].state == State.Funding,  "Funding stage ended!");
         require(_products[productIndex].remaining_funding >= amount, "Funding goal exceeded!");
+        require(amount > 0);
 
         if(_fundersPerProduct[productIndex][msg.sender].exists == true){
             uint256 currentSum = _fundersPerProduct[productIndex][msg.sender].amount;
