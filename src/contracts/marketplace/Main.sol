@@ -275,6 +275,7 @@ contract Main {
         require(_products[productIndex].state == State.Teaming);
         require(_products[productIndex].evaluator == address(0));
         _products[productIndex].evaluator = msg.sender;
+        changeProductState(productIndex);
         return true;
     }
 
