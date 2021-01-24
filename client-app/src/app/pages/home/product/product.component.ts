@@ -37,8 +37,6 @@ export class ProductComponent implements OnInit {
     this.userService.userObservable().subscribe((user: Account) => this.zone.run(() => this.user = user));
   }
   async ngOnInit(): Promise<void> {
-    console.log(this.product);
-    
     const freelancers: [] = await C_CALL(this.snackBar, this.contractsService.Marketplace, "getFreelancersPerProduct", [this.productIndex]);
     this.freelancers = freelancers.map((freelancer: []) => {
       const f = FreelancerKeys.reduce((obj, key) => {
@@ -138,5 +136,7 @@ export class ProductComponent implements OnInit {
         freelancers: this.freelancers
       }
     });
+    dialogRef.afterClosed()
+    .subscribe(_ => this.productNotifierService.notify(this.productIndex));
   }
 }
