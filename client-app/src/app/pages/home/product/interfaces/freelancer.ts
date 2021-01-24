@@ -3,6 +3,7 @@ export interface Freelancer {
     sum: number;
     expertise: string;
     approved: boolean;
+    reputation: number;
 }
 
-export const FreelancerKeys = ["account", "sum", "expertise", "approved"];
+export const FreelancerKeys = ["account", "sum", "expertise", "approved", "reputation"];

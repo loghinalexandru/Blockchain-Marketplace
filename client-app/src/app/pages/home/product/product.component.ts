@@ -40,7 +40,7 @@ export class ProductComponent implements OnInit {
     let freelancers: [];
     if (this.product.state == 1) {
       freelancers = await C_CALL(this.snackBar, this.contractsService.Marketplace, "getFreelancersPerProduct", [this.productIndex]);
-    }else{
+    } else {
       freelancers = await C_CALL(this.snackBar, this.contractsService.Marketplace, "getTeamPerProduct", [this.productIndex]);
     }
     this.freelancers = freelancers.map((freelancer: []) => {
@@ -78,9 +78,9 @@ export class ProductComponent implements OnInit {
   }
 
   public get canSubmit(): boolean {
-    return this.product.state == 2 
-    && this.user.isFreelancer 
-    && this.freelancers.findIndex(f => f.account.toLowerCase() == this.user.address.toLowerCase()) > -1;
+    return this.product.state == 2
+      && this.user.isFreelancer
+      && this.freelancers.findIndex(f => f.account.toLowerCase() == this.user.address.toLowerCase()) > -1;
   }
 
   public get canJoinAsEvaluator(): boolean {
@@ -93,6 +93,12 @@ export class ProductComponent implements OnInit {
 
   public get canViewApplicants(): boolean {
     return this.user.isManager && this.user.address.toLowerCase() == this.product.manager.toLowerCase();
+  }
+
+  public get canAcceptProduct(): boolean {
+    return this.user.isManager &&
+      this.product.state == 3 &&
+      this.product.manager.toLowerCase() == this.user.address.toLowerCase();
   }
 
   public onFund(): void {
@@ -147,8 +153,13 @@ export class ProductComponent implements OnInit {
       .subscribe(_ => this.productNotifierService.notify(this.productIndex));
   }
 
-  public async onSubmit(): Promise<void> {
+  public async onSubmitApplication(): Promise<void> {
     await C_TRANSACT(this.snackBar, this.contractsService.Marketplace, "notifyManager", [this.productIndex]);
+    await this.productNotifierService.notify(this.productIndex);
+  }
+
+  public async onSubmitProduct(value:boolean): Promise<void> {
+    await C_TRANSACT(this.snackBar, this.contractsService.Marketplace, "acceptProduct", [value, this.productIndex]);
     await this.productNotifierService.notify(this.productIndex);
   }
 }

@@ -42,9 +42,20 @@
             (click)="onViewApplications()"
             color="primary">View Applications</button>
     </div>
-
     <div>
         <button mat-raised-button color="primary" *ngIf="canSubmit"
-        (click)="onSubmit()">Submit</button>
+        (click)="onSubmitApplication()">Submit</button>
+    </div>
+    <div *ngIf="canAcceptProduct">
+        <button mat-raised-button 
+        (click)="onSubmitProduct(true)"
+        color="primary">
+            Accept
+        </button>
+        <button mat-raised-button 
+        (click)="onSubmitProduct(false)"
+        color="warn">
+            Reject
+        </button>
     </div>
 </mat-card>
