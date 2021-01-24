@@ -1,0 +1,19 @@
+<h1 mat-dialog-title>YetAnotherEthereumToken</h1>
+<div mat-dialog-content>
+    <div class="flex-column">
+        <mat-form-field>
+            <mat-label>Token count</mat-label>
+            <input matInput
+                [(ngModel)]="data">
+        </mat-form-field>
+    </div>
+</div>
+<div mat-dialog-actions>
+    <button mat-raised-button
+        color="primary"
+        (click)="onNoClick()">No Thanks</button>
+    <button mat-raised-button
+        color="primary"
+        [mat-dialog-close]="data"
+        cdkFocusInitial>Buy</button>
+</div>

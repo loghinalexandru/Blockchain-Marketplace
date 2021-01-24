@@ -32,15 +32,16 @@ export class HomeComponent implements OnInit {
 
     list.forEach(async acc => {
       const amount = await this.w3.eth.getBalance(acc);
+      const tokens = await this.contractsService.YetAnotherEthereumToken.methods.balanceOf(acc).call();
       this.accounts.push({
         balance: amount,
-        account: acc
+        account: acc,
+        tokens: tokens
       });
     });
 
     this.contract = this.contractsService.Marketplace;
     const productCount = await this.contract.methods.getProductCount().call({ from: this.metaMaskService.user });
-    console.log(productCount);
 
     for (let i = 0; i < productCount; i++) {
       const product = await this.contract.methods.getProduct(i).call({ from: this.metaMaskService.user });

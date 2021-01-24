@@ -23,6 +23,7 @@ import {MatNativeDateModule} from '@angular/material/core';
 import { NewProductDialog } from './pages/home/new-product/new-product.dialog';
 import { NewManagerDialog } from './pages/home/new-manager/new-manager.dialog';
 import { ProductComponent } from './pages/home/product/product.component';
+import { NewBuyTokensDialog } from './comp/header/new-buy-tokens.dialog';
 
 
 @NgModule({
@@ -33,6 +34,7 @@ import { ProductComponent } from './pages/home/product/product.component';
     HeaderComponent,
     NewProductDialog,
     NewManagerDialog,
+    NewBuyTokensDialog,
     ProductComponent
   ],
   imports: [
