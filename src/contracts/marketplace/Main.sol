@@ -252,6 +252,8 @@ contract Main {
 
     function applyForProduct(uint256 productIndex, uint256 sum) public _productExists(productIndex) _isFreelancer returns(bool){
         require(_products[productIndex].state == State.Teaming);
+        require(_products[productIndex].development_cost >= sum);
+        
         _freelancersPerProduct[productIndex].push(Application(msg.sender, sum));
         return true;
     }
