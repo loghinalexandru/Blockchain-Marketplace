@@ -6,22 +6,63 @@
       <p class="body-1">Hash: {{ account.account }}</p>
       <div class="top slim">
         <p class="body-1">Tokens: {{ account.tokens }}</p>
-        <button mat-raised-button color="warn" (click)="onBuyTokens()">Buy tokens</button>
+        <button mat-raised-button
+          color="warn"
+          (click)="onBuyTokens()">Buy tokens</button>
       </div>
     </div>
   </mat-card>
-  <div class="flex-column">
-    <button mat-raised-button
+  <div *ngIf="!hasRole || isManager"
+  class="flex-column margin">
+    <button *ngIf="isManager"
+      mat-raised-button
       color="primary"
       (click)="onNewProduct()">New product</button>
-    <button mat-raised-button
-      color="primary"
-      (click)="onNewManager()">Become a manager</button>
+    <div *ngIf="!hasRole"
+      class="flex-column">
+      <button mat-raised-button
+        color="primary"
+        (click)="onNewManager()">Become a manager</button>
+      <button mat-raised-button
+        color="primary"
+        (click)='onNewRole("DEV")'>Become a freelancer</button>
+      <button mat-raised-button
+        color="primary"
+        (click)='onNewRole("EVL")'>Become an evaluator</button>
+    </div>
   </div>
 </div>
-
 <div class="top">
-  <div *ngFor="let product of products">
-    <app-product [data]=product></app-product>
+  <div *ngIf="products.length > 0"
+    class="flex-column">
+    <div class="center">
+      <mat-button-toggle-group #group="matButtonToggleGroup">
+        <mat-button-toggle selected
+          value="0">
+          Funding
+        </mat-button-toggle>
+        <mat-button-toggle value="1">
+          Teaming
+        </mat-button-toggle>
+        <mat-button-toggle value="2">
+          In progress
+        </mat-button-toggle>
+        <mat-button-toggle value="3">
+          Evaluating
+        </mat-button-toggle>
+        <mat-button-toggle value="4">
+          Disputing
+        </mat-button-toggle>
+        <mat-button-toggle value="5">
+          Finished
+        </mat-button-toggle>
+      </mat-button-toggle-group>
+    </div>
+    <div class="top">
+      <div *ngFor="let product of products">
+        <app-product *ngIf="product.state == group.value"
+          [product]=product></app-product>
+      </div>
+    </div>
   </div>
 </div>

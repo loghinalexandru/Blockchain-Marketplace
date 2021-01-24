@@ -19,11 +19,13 @@ import { MatFormFieldModule, MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/mat
 import { MatInputModule } from '@angular/material/input';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
-import {MatNativeDateModule} from '@angular/material/core';
+import { MatNativeDateModule } from '@angular/material/core';
 import { NewProductDialog } from './pages/home/new-product/new-product.dialog';
 import { NewManagerDialog } from './pages/home/new-manager/new-manager.dialog';
 import { ProductComponent } from './pages/home/product/product.component';
 import { NewBuyTokensDialog } from './pages/home/tokens/new-buy-tokens.dialog';
+import { MatButtonToggleModule } from '@angular/material/button-toggle'
+import { NewRoleExpertiseDialog } from './pages/home/new-role-expertise/new-role-expertise.dialog';
 
 
 @NgModule({
@@ -35,6 +37,7 @@ import { NewBuyTokensDialog } from './pages/home/tokens/new-buy-tokens.dialog';
     NewProductDialog,
     NewManagerDialog,
     NewBuyTokensDialog,
+    NewRoleExpertiseDialog,
     ProductComponent
   ],
   imports: [
@@ -50,7 +53,8 @@ import { NewBuyTokensDialog } from './pages/home/tokens/new-buy-tokens.dialog';
     MatInputModule,
     ReactiveFormsModule,
     FormsModule,
-    MatNativeDateModule
+    MatNativeDateModule,
+    MatButtonToggleModule
   ],
   providers: [
     ContractsService,

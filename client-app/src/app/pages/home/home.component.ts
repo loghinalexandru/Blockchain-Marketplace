@@ -9,6 +9,8 @@ import { NewProductDialog } from './new-product/new-product.dialog';
 import { NewManagerDialog } from './new-manager/new-manager.dialog';
 import { ProductKeys } from './product/product';
 import { NewBuyTokensDialog } from './tokens/new-buy-tokens.dialog';
+import { NewRoleExpertise } from './new-role-expertise/new-role-expertise';
+import { NewRoleExpertiseDialog } from './new-role-expertise/new-role-expertise.dialog';
 
 @Component({
   selector: 'app-home',
@@ -19,6 +21,11 @@ export class HomeComponent implements OnInit {
 
   public accounts = [];
   public products = [];
+
+  public isManager: boolean = false;
+  public isEvaluator: boolean = false;
+  public isFreelancer: boolean = false;
+
   private marketplace;
   private tokens;
 
@@ -27,7 +34,7 @@ export class HomeComponent implements OnInit {
     private readonly contractsService: ContractsService,
     private readonly metaMaskService: MetaMaskService,
     private readonly dialog: MatDialog
-  ) { }
+  ) {}
 
   async ngOnInit(): Promise<void> {
     const list = await this.w3.eth.getAccounts();
@@ -45,10 +52,16 @@ export class HomeComponent implements OnInit {
     this.marketplace = this.contractsService.Marketplace;
     this.tokens = this.contractsService.YetAnotherEthereumToken;
 
-    const productCount = await this.marketplace.methods.getProductCount().call({ from: this.metaMaskService.user });
+    const productCount = await this.marketplace.methods.getProductCount().call();
+
+    this.isManager = await this.marketplace.methods.isManager().call();
+    this.isFreelancer = await this.marketplace.methods.isFreelancer().call();
+    this.isEvaluator = await this.marketplace.methods.isEvaluator().call();
+
+    console.log(this.isManager, this.isFreelancer, this.isEvaluator);
 
     for (let i = 0; i < productCount; i++) {
-      const product = await this.marketplace.methods.getProduct(i).call({ from: this.metaMaskService.user });
+      const product = await this.marketplace.methods.getProduct(i).call();
       const p = ProductKeys.reduce((obj, key) => {
         obj[key] = product[key];
         return obj;
@@ -70,7 +83,7 @@ export class HomeComponent implements OnInit {
         this.tokens
                   .methods
                   .buyTokens(this.metaMaskService.user, res)
-                  .send({ from: this.metaMaskService.user })
+                  .send()
                   .then(res => console.log(res))
                   .catch(err => console.log(err));
       });
@@ -87,7 +100,7 @@ export class HomeComponent implements OnInit {
           this.marketplace
             .methods
             .createProduct(res.description, res.developmentCost, res.evaluatorReward, res.expetise)
-            .send({ from: this.metaMaskService.user })
+            .send()
             .then(res => console.log(res))
             .catch(err => console.log(err));
         }
@@ -101,21 +114,39 @@ export class HomeComponent implements OnInit {
     });
     dialogRef.afterClosed()
       .subscribe((res: string) => {
-        if (res == undefined || res == "") {
-          alert("Invalid name");
-        }
-
-        this.marketplace
+        if (res != undefined && res != "") {
+          this.marketplace
           .methods
           .addManager(res)
-          .send({ from: this.metaMaskService.user })
+          .send()
           .then(res => console.log(res))
           .catch(err => console.log(err));
+        }
+      });
+  }
 
+  public onNewRole(role:string): void {
+    const dialogRef = this.dialog.open(NewRoleExpertiseDialog, {
+        width: "350px",
+        data: {}
+      });
+    dialogRef.afterClosed()
+      .subscribe(async (res: NewRoleExpertise) => {
+        if (res != undefined) {
+          if(role == "EVL") {
+            await this.marketplace.methods.addFreelancer(res.name, res.expertise).send();
+            return;
+          }
+          await this.marketplace.methods.addEvaluator(res.name, res.expertise).send();
+        }
       });
   }
 
   private get w3(): Web3 {
     return this.w3s.web3;
+  }
+
+  public get hasRole():boolean {
+    return this.isEvaluator || this.isFreelancer || this.isManager;
   }
 }

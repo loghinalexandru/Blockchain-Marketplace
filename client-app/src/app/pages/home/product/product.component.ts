@@ -9,22 +9,28 @@ import { Product } from './product';
 export class ProductComponent implements OnInit {
 
   @Input()
-  public data: Product;
+  public product: Product;
+  public isManager: boolean;
+  public isFreelancer: boolean;
+  public isEvaluator: boolean;
 
   constructor() { }
 
   ngOnInit(): void {
-    console.log(this.data);
+    console.log(this.product);
   }
 
-  public get state():string {
-    switch (this.data.state) {
-      case 0: return "Looking for funds"; 
-      case 1: return "Looking for freelances"; 
-      case 2: return "In progress"; 
-      case 3: return "Evaluating"; 
-      case 4: return "Done"; 
-      default: return "Something is wrong"; 
-    }
+  private states = {
+    0: "Looking for funds",
+    1: "Looking for freelances",
+    2: "In progress",
+    3: "Evaluating",
+    4: "Disputing",
+    5: "Finished"
+  };
+
+  public get state(): string {
+    const res = this.states[this.product.state] ?? "Something is wrong";
+    return res;
   }
 }
