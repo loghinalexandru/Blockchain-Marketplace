@@ -1,12 +1,10 @@
-import Web3 from 'web3';
-
-import { ChangeDetectorRef, Component, NgZone, OnInit } from '@angular/core';
+import { Component, NgZone, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { ContractsService } from 'src/app/services/services/contracts.service';
 import { NewProductData } from './new-product/new-product-data';
 import { NewProductDialog } from './new-product/new-product.dialog';
 import { NewManagerDialog } from './new-manager/new-manager.dialog';
-import { ProductKeys } from './product/product';
+import { Product, ProductKeys } from './product/product';
 import { NewBuyTokensDialog } from './tokens/new-buy-tokens.dialog';
 import { NewRoleExpertise } from './new-role-expertise/new-role-expertise';
 import { NewRoleExpertiseDialog } from './new-role-expertise/new-role-expertise.dialog';
@@ -14,6 +12,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { C_CALL, C_TRANSACT } from 'src/app/services/easy-contract';
 import contracts from '@assets/contracts.json';
 import { UserService, Account } from 'src/app/services/services/user.service';
+import { ProductNotifierService } from 'src/app/services/services/product-notifier.service';
 
 @Component({
   selector: 'app-home',
@@ -23,19 +22,21 @@ import { UserService, Account } from 'src/app/services/services/user.service';
 export class HomeComponent implements OnInit {
 
   public user: Account;
-  public products = [];
+  public products: Product[] = [];
 
   constructor(
     private readonly contractsService: ContractsService,
     private readonly dialog: MatDialog,
     private readonly snackBar: MatSnackBar,
     private readonly userService: UserService,
+    private readonly productNotifierService: ProductNotifierService,
     private readonly zone: NgZone
   ) {
   }
 
   async ngOnInit(): Promise<void> {
     this.userService.userObservable().subscribe((user: Account) => { this.zone.run(() => this.user = user); });
+    this.productNotifierService.getObservable().subscribe(index => this.updateProduct(index));
 
     const productCount = await C_CALL<number>(this.snackBar, this.contractsService.Marketplace, "getProductCount", []);
     for (let i = 0; i < productCount; i++) {
@@ -43,13 +44,23 @@ export class HomeComponent implements OnInit {
     }
   }
 
+  private async updateProduct(index: number): Promise<void> {
+    const p: Product = await this.mapProduct(index);
+    this.products[index] = p;
+  }
+
   private async setProduct(index: number): Promise<void> {
+    const p = await this.mapProduct(index);
+    this.products.push(p);
+  }
+
+  private async mapProduct(index: number): Promise<Product> {
     const product = await C_CALL<number>(this.snackBar, this.contractsService.Marketplace, "getProduct", [index]);
     const p = ProductKeys.reduce((obj, key) => {
       obj[key] = product[key];
       return obj;
-    }, {});
-    this.products.push(p);
+    }, {}) as Product;
+    return p;
   }
 
   public onBuyTokens(): void {
@@ -126,5 +137,9 @@ export class HomeComponent implements OnInit {
 
   public get hasRole(): boolean {
     return this.user.isEvaluator || this.user.isFreelancer || this.user.isManager;
+  }
+
+  public get role(): string {
+    return this.user.isFreelancer ? "Freelancer" : this.user.isManager ? "Manager" : this.user.isEvaluator ? "Evaluator" : " <select your role>"
   }
 }

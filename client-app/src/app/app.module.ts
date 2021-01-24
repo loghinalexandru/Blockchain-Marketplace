@@ -27,6 +27,9 @@ import { NewBuyTokensDialog } from './pages/home/tokens/new-buy-tokens.dialog';
 import { MatButtonToggleModule } from '@angular/material/button-toggle'
 import { NewRoleExpertiseDialog } from './pages/home/new-role-expertise/new-role-expertise.dialog';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { FundDialog } from './pages/home/product/fund-dialog/fund.dialog';
+import { ProductNotifierService } from './services/services/product-notifier.service';
+import { UserService } from './services/services/user.service';
 
 @NgModule({
   declarations: [
@@ -38,6 +41,7 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
     NewManagerDialog,
     NewBuyTokensDialog,
     NewRoleExpertiseDialog,
+    FundDialog,
     ProductComponent
   ],
   imports: [
@@ -60,7 +64,9 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
   providers: [
     ContractsService,
     MetaMaskService,
-    Web3Service
+    Web3Service,
+    ProductNotifierService,
+    UserService
   ],
   bootstrap: [AppComponent]
 })

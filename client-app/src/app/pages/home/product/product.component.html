@@ -11,14 +11,15 @@
     <p class="mat-body-strong">Expertise</p>
     <p class="body-2">{{product.expertise}}</p>
     <mat-divider></mat-divider>
-    <p class="mat-body-strong">Development funding left</p>
+    <p class="mat-body-strong">Development reward</p>
     <p class="body-2">{{product.remaining_development_funding}}</p>
     <mat-divider></mat-divider>
     <p class="mat-body-strong">Needed funds</p>
     <div class="flex-row">
         <p class="body-2">{{product.remaining_funding}}</p>
         <button *ngIf="canFund"
-        mat-raised-button
+            (click)="onFund()"
+            mat-raised-button
             color="accent">Fund</button>
     </div>
     <mat-divider></mat-divider>

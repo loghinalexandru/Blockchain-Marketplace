@@ -1,6 +1,6 @@
 <div class="top">
   <mat-card>
-    <mat-card-title>Welcome</mat-card-title>
+    <mat-card-title>Welcome {{role}}</mat-card-title>
     <div>
       <p class="body-1">Balance: {{ user.balance }}</p>
       <p class="body-1">Address: {{ user.address }}</p>
@@ -69,9 +69,10 @@
       </mat-button-toggle-group>
     </div>
     <div class="top">
-      <div *ngFor="let product of products">
+      <div *ngFor="let product of products; index as i">
         <app-product *ngIf="product.state == group.value"
-          [product]=product></app-product>
+          [product]=product
+          [productIndex]=i></app-product>
       </div>
     </div>
   </div>

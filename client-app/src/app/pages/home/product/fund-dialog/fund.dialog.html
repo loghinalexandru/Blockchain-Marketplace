@@ -1,0 +1,24 @@
+<h1 mat-dialog-title>How much would you like to fund this project?</h1>
+<div mat-dialog-content>
+    <div class="flex-column">
+        <mat-form-field>
+            <mat-label>Your name</mat-label>
+            <input matInput
+                [(ngModel)]="data.name">
+        </mat-form-field>
+        <mat-form-field>
+            <mat-label>Fund amount</mat-label>
+            <input matInput type="number"
+                [(ngModel)]="data.amount">
+        </mat-form-field>
+    </div>
+</div>
+<div mat-dialog-actions>
+    <button mat-raised-button
+        color="warn"
+        (click)="onNoClick()">No Thanks</button>
+    <button mat-raised-button
+        color="primary"
+        [mat-dialog-close]="data"
+        cdkFocusInitial>Fund</button>
+</div>
