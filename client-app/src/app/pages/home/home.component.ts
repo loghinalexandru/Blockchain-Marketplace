@@ -11,6 +11,8 @@ import { ProductKeys } from './product/product';
 import { NewBuyTokensDialog } from './tokens/new-buy-tokens.dialog';
 import { NewRoleExpertise } from './new-role-expertise/new-role-expertise';
 import { NewRoleExpertiseDialog } from './new-role-expertise/new-role-expertise.dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { C_CALL, C_TRANSACT } from 'src/app/services/easy-contract';
 
 @Component({
   selector: 'app-home',
@@ -33,15 +35,18 @@ export class HomeComponent implements OnInit {
     private readonly w3s: Web3Service,
     private readonly contractsService: ContractsService,
     private readonly metaMaskService: MetaMaskService,
-    private readonly dialog: MatDialog
-  ) {}
+    private readonly dialog: MatDialog,
+    private readonly snackBar: MatSnackBar
+  ) { 
+    this.marketplace = this.contractsService.Marketplace;
+    this.tokens = this.contractsService.YetAnotherEthereumToken;
+  }
 
   async ngOnInit(): Promise<void> {
     const list = await this.w3.eth.getAccounts();
-
     list.forEach(async acc => {
       const amount = await this.w3.eth.getBalance(acc);
-      const tokens = await this.contractsService.YetAnotherEthereumToken.methods.balanceOf(acc).call();
+      const tokens = await C_CALL<number>(this.snackBar, this.tokens, "balanceOf",[acc]);
       this.accounts.push({
         balance: amount,
         account: acc,
@@ -49,19 +54,15 @@ export class HomeComponent implements OnInit {
       });
     });
 
-    this.marketplace = this.contractsService.Marketplace;
-    this.tokens = this.contractsService.YetAnotherEthereumToken;
 
-    const productCount = await this.marketplace.methods.getProductCount().call();
-
-    this.isManager = await this.marketplace.methods.isManager().call();
-    this.isFreelancer = await this.marketplace.methods.isFreelancer().call();
-    this.isEvaluator = await this.marketplace.methods.isEvaluator().call();
-
+    const productCount = await C_CALL<number>(this.snackBar, this.marketplace, "getProductCount",[]);
+    this.isManager = await C_CALL<boolean>(this.snackBar, this.marketplace, "isManager",[]);
+    this.isFreelancer = await C_CALL<boolean>(this.snackBar, this.marketplace, "isFreelancer",[]);
+    this.isEvaluator = await C_CALL<boolean>(this.snackBar, this.marketplace, "isEvaluator",[]);;
     console.log(this.isManager, this.isFreelancer, this.isEvaluator);
 
     for (let i = 0; i < productCount; i++) {
-      const product = await this.marketplace.methods.getProduct(i).call();
+      const product = await C_CALL<number>(this.snackBar, this.marketplace, "getProduct",[i]);
       const p = ProductKeys.reduce((obj, key) => {
         obj[key] = product[key];
         return obj;
@@ -70,22 +71,17 @@ export class HomeComponent implements OnInit {
     }
   }
 
-  public onBuyTokens(): void{
+  public onBuyTokens(): void {
     const dialogRef = this.dialog.open(NewBuyTokensDialog, {
       width: "350px",
       data: ""
     });
     dialogRef.afterClosed()
-      .subscribe((res: number) => {
+      .subscribe(async (res: number) => {
         if (res == undefined) {
           alert("Invalid input");
         }
-        this.tokens
-                  .methods
-                  .buyTokens(this.metaMaskService.user, res)
-                  .send()
-                  .then(res => console.log(res))
-                  .catch(err => console.log(err));
+        await C_TRANSACT(this.snackBar, this.tokens, "buyTokens",[this.metaMaskService.user, res]);
       });
   }
 
@@ -95,14 +91,9 @@ export class HomeComponent implements OnInit {
       data: {}
     });
     dialogRef.afterClosed()
-      .subscribe((res: NewProductData) => {
+      .subscribe(async (res: NewProductData) => {
         if (res != undefined) {
-          this.marketplace
-            .methods
-            .createProduct(res.description, res.developmentCost, res.evaluatorReward, res.expetise)
-            .send()
-            .then(res => console.log(res))
-            .catch(err => console.log(err));
+          await C_TRANSACT(this.snackBar, this.marketplace, "createProduct", [res.description, res.developmentCost, res.evaluatorReward, res.expetise]);
         }
       });
   }
@@ -113,31 +104,26 @@ export class HomeComponent implements OnInit {
       data: ""
     });
     dialogRef.afterClosed()
-      .subscribe((res: string) => {
+      .subscribe(async (res: string) => {
         if (res != undefined && res != "") {
-          this.marketplace
-          .methods
-          .addManager(res)
-          .send()
-          .then(res => console.log(res))
-          .catch(err => console.log(err));
+          await C_TRANSACT(this.snackBar, this.marketplace, "addManager", [res]);
         }
       });
   }
 
-  public onNewRole(role:string): void {
+  public onNewRole(role: string): void {
     const dialogRef = this.dialog.open(NewRoleExpertiseDialog, {
-        width: "350px",
-        data: {}
-      });
+      width: "350px",
+      data: {}
+    });
     dialogRef.afterClosed()
       .subscribe(async (res: NewRoleExpertise) => {
         if (res != undefined) {
-          if(role == "EVL") {
-            await this.marketplace.methods.addFreelancer(res.name, res.expertise).send();
+          if (role == "EVL") {
+            await C_TRANSACT(this.snackBar, this.marketplace, "addFreelancer", [res.name, res.expertise]);
             return;
           }
-          await this.marketplace.methods.addEvaluator(res.name, res.expertise).send();
+          await C_TRANSACT(this.snackBar, this.marketplace, "addEvaluator", [res.name, res.expertise]);
         }
       });
   }
@@ -146,7 +132,7 @@ export class HomeComponent implements OnInit {
     return this.w3s.web3;
   }
 
-  public get hasRole():boolean {
+  public get hasRole(): boolean {
     return this.isEvaluator || this.isFreelancer || this.isManager;
   }
 }

@@ -26,7 +26,7 @@ import { ProductComponent } from './pages/home/product/product.component';
 import { NewBuyTokensDialog } from './pages/home/tokens/new-buy-tokens.dialog';
 import { MatButtonToggleModule } from '@angular/material/button-toggle'
 import { NewRoleExpertiseDialog } from './pages/home/new-role-expertise/new-role-expertise.dialog';
-
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 @NgModule({
   declarations: [
@@ -54,7 +54,8 @@ import { NewRoleExpertiseDialog } from './pages/home/new-role-expertise/new-role
     ReactiveFormsModule,
     FormsModule,
     MatNativeDateModule,
-    MatButtonToggleModule
+    MatButtonToggleModule,
+    MatSnackBarModule
   ],
   providers: [
     ContractsService,
