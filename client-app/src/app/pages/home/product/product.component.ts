@@ -1,23 +1,26 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, NgZone, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { C_TRANSACT } from 'src/app/services/easy-contract';
+import { C_CALL, C_TRANSACT } from 'src/app/services/easy-contract';
 import { ContractsService } from 'src/app/services/services/contracts.service';
 import { ProductNotifierService } from 'src/app/services/services/product-notifier.service';
 import { Account, UserService } from 'src/app/services/services/user.service';
 import { FundData } from './fund-dialog/fund-data';
 import { FundDialog } from './fund-dialog/fund.dialog';
-import { Product } from './product';
+import { JoinFreelancerDialog } from './join-freelancer/join-freelancer.dialog';
+import { Product } from './interfaces/product';
+import { Freelancer, FreelancerKeys } from './interfaces/freelancer';
 
 @Component({
   selector: 'app-product',
   templateUrl: './product.component.html',
   styleUrls: ['./product.component.scss']
 })
-export class ProductComponent {
+export class ProductComponent implements OnInit {
+
+  private freelancers: Freelancer[] = [];
 
   public user: Account;
-
   @Input()
   public product: Product;
   @Input()
@@ -28,8 +31,19 @@ export class ProductComponent {
     private readonly snackBar: MatSnackBar,
     private readonly contractsService: ContractsService,
     private readonly dialog: MatDialog,
-    private readonly productNotifierService: ProductNotifierService) {
-    this.userService.userObservable().subscribe((user: Account) => this.user = user);
+    private readonly productNotifierService: ProductNotifierService,
+    private readonly zone: NgZone) {
+    this.userService.userObservable().subscribe((user: Account) => this.zone.run(() => this.user = user));
+  }
+  async ngOnInit(): Promise<void> {
+    const freelancers: [] = await C_CALL(this.snackBar, this.contractsService.Marketplace, "getFreelancersPerProduct", [this.productIndex]);
+    this.freelancers = freelancers.map((freelancer: []) => {
+      const f = FreelancerKeys.reduce((obj, key) => {
+        obj[key] = freelancer[key];
+        return obj;
+      }, {}) as Freelancer;
+      return f;
+    });
   }
 
   private states = {
@@ -46,7 +60,15 @@ export class ProductComponent {
   }
 
   public get canJoinAsFreelancer(): boolean {
-    return this.product.state == 1;
+    return this.product.state == 1 && this.user.isFreelancer && this.freelancers.findIndex(f => f.account.toLowerCase() == this.user.address.toLowerCase()) < 0;
+  }
+
+  public get alreadyJoined(): boolean {
+    return this.freelancers.findIndex(f => f.account.toLowerCase() == this.user.address.toLowerCase()) > -1
+  }
+
+  public get alreadyEvaluator(): boolean {
+    return this.user.address.toLowerCase() == this.product.evaluator.toLocaleLowerCase();
   }
 
   public get canSubmit(): boolean {
@@ -54,7 +76,7 @@ export class ProductComponent {
   }
 
   public get canJoinAsEvaluator(): boolean {
-    return this.product.evaluator === "0x0000000000000000000000000000000000000000" && this.product.state == 1;
+    return this.product.evaluator === "0x0000000000000000000000000000000000000000" && this.product.state == 1 && this.user.isEvaluator;
   }
 
   public get canFund(): boolean {
@@ -77,5 +99,27 @@ export class ProductComponent {
         await this.productNotifierService.notify(this.productIndex);
       }
     })
+  }
+
+  public onJoinFreelancer(): void {
+    const dialogRef = this.dialog.open(JoinFreelancerDialog, {
+      data: 0
+    });
+    dialogRef.afterClosed().subscribe(async (data: number) => {
+      if (data === undefined) {
+        return;
+      }
+      if (data > this.product.development_cost) {
+        this.snackBar.open("You cannot be paid more than the projects development fund", "", { duration: 1000 });
+      } else {
+        await C_TRANSACT(this.snackBar, this.contractsService.Marketplace, "applyForProduct", [this.productIndex, data]);
+        await this.productNotifierService.notify(this.productIndex);
+      }
+    })
+  }
+
+  public async onJoinEvaluator(): Promise<void> {
+    await C_TRANSACT(this.snackBar, this.contractsService.Marketplace, "applyForProductEvaluation", [this.productIndex]);
+    await this.productNotifierService.notify(this.productIndex);
   }
 }

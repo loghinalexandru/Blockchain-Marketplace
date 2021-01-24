@@ -4,7 +4,7 @@ import { ContractsService } from 'src/app/services/services/contracts.service';
 import { NewProductData } from './new-product/new-product-data';
 import { NewProductDialog } from './new-product/new-product.dialog';
 import { NewManagerDialog } from './new-manager/new-manager.dialog';
-import { Product, ProductKeys } from './product/product';
+import { Product, ProductKeys } from './product/interfaces/product';
 import { NewBuyTokensDialog } from './tokens/new-buy-tokens.dialog';
 import { NewRoleExpertise } from './new-role-expertise/new-role-expertise';
 import { NewRoleExpertiseDialog } from './new-role-expertise/new-role-expertise.dialog';
@@ -50,7 +50,7 @@ export class HomeComponent implements OnInit {
   }
 
   private async setProduct(index: number): Promise<void> {
-    const p = await this.mapProduct(index);
+    const p: Product = await this.mapProduct(index);
     this.products.push(p);
   }
 
@@ -100,7 +100,7 @@ export class HomeComponent implements OnInit {
       .subscribe(async (res: NewProductData) => {
         if (res != undefined) {
           await C_TRANSACT(this.snackBar, this.contractsService.Marketplace, "createProduct", [res.description, res.developmentCost, res.evaluatorReward, res.expetise]);
-          this.setProduct(this.products.length + 1);
+          this.setProduct(this.products.length);
         }
       });
   }
@@ -128,8 +128,8 @@ export class HomeComponent implements OnInit {
       .subscribe(async (res: NewRoleExpertise) => {
         if (res != undefined) {
           role == "EVL"
-            ? await C_TRANSACT(this.snackBar, this.contractsService.Marketplace, "addFreelancer", [res.name, res.expertise])
-            : await C_TRANSACT(this.snackBar, this.contractsService.Marketplace, "addEvaluator", [res.name, res.expertise]);
+            ? await C_TRANSACT(this.snackBar, this.contractsService.Marketplace, "addEvaluator", [res.name, res.expertise])
+            : await C_TRANSACT(this.snackBar, this.contractsService.Marketplace, "addFreelancer", [res.name, res.expertise]);
           await this.userService.notifyUserInfo();
         }
       });

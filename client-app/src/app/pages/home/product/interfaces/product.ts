@@ -1,6 +1,6 @@
 export interface Product {
     description: string;
-    development_cost: string;
+    development_cost: number;
     evaluator: string;
     evaluator_reward: string;
     exists: boolean;

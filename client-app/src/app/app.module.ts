@@ -30,6 +30,7 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { FundDialog } from './pages/home/product/fund-dialog/fund.dialog';
 import { ProductNotifierService } from './services/services/product-notifier.service';
 import { UserService } from './services/services/user.service';
+import { JoinFreelancerDialog } from './pages/home/product/join-freelancer/join-freelancer.dialog';
 
 @NgModule({
   declarations: [
@@ -42,7 +43,8 @@ import { UserService } from './services/services/user.service';
     NewBuyTokensDialog,
     NewRoleExpertiseDialog,
     FundDialog,
-    ProductComponent
+    ProductComponent,
+    JoinFreelancerDialog
   ],
   imports: [
     BrowserModule,

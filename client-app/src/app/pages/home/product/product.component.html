@@ -27,10 +27,14 @@
     <p class="body-2">{{state}}</p>
     <mat-divider></mat-divider>
     <div>
+        <div *ngIf="alreadyJoined">✅ Pending Approval </div>
+        <div *ngIf="alreadyEvaluator">✅ Joined </div>
         <button *ngIf="canJoinAsFreelancer"
+            (click)="onJoinFreelancer()"
             mat-raised-button
             class="green">Join as freelancer</button>
         <button *ngIf="canJoinAsEvaluator"
+            (click)="onJoinEvaluator()"
             mat-raised-button
             color="primary"> Join as evaluator</button>
         <button *ngIf="canSubmit">Submit</button>

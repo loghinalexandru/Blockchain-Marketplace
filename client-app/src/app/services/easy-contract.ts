@@ -1,16 +1,23 @@
 import { MatSnackBar } from "@angular/material/snack-bar";
 
-export function C_CALL<T>(snackBar: MatSnackBar, contract: any, method: string, args: any[]): Promise<T> {
+export function C_CALL<T>(snackBar: MatSnackBar, contract: any, method: string, args: any[], retryCount: number = 0): Promise<T> {
     return new Promise<T>((resolve, reject) => {
         contract.methods[method](...args).call()
             .then(res =>
-                // snackBar.open("🎉🎉 ✅");
                 resolve(res))
-            .catch(err => {
-                snackBar.open("😭😭😭😭", "", {
-                    duration: 1000
-                });
-                reject(":(");
+            .catch(async err => {
+                if (retryCount === 3) {
+                    snackBar.open("😭😭😭😭", "", {
+                        duration: 1000
+                    });
+                    console.log(err);
+                }
+                if (retryCount < 3) {
+                    await new Promise(resolve => setTimeout(async () => resolve(null), 1000));
+                    const result = await C_CALL<T>(snackBar, contract, method, args, retryCount + 1);
+                    resolve(result);
+                }
+                else { reject("Unable to view the blockchain"); }
             });
     });
 }
