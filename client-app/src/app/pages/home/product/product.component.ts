@@ -14,6 +14,7 @@ export class ProductComponent implements OnInit {
   constructor() { }
 
   ngOnInit(): void {
+    console.log(this.data);
   }
 
   public get state():string {

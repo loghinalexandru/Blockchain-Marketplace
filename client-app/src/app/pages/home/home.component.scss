@@ -2,7 +2,7 @@
     width: 100%;
     display: flex;
     flex-direction: column;
-    justify-content: space-evenly;
+    justify-content: flex-start;
 }
 
 .top {
@@ -14,6 +14,11 @@
     justify-content: space-evenly;
 
     margin: 16px;
+
+    .slim {
+        margin: 0px;
+        justify-content: space-between;
+    }
 }
 
 button {

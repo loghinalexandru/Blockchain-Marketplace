@@ -4,7 +4,10 @@
     <div *ngFor="let account of accounts">
       <p class="body-1">Balance: {{ account.balance }}</p>
       <p class="body-1">Hash: {{ account.account }}</p>
-      <p class="body-1">Tokens: {{ account.tokens }}</p>
+      <div class="top slim">
+        <p class="body-1">Tokens: {{ account.tokens }}</p>
+        <button mat-raised-button color="warn" (click)="onBuyTokens()">Buy tokens</button>
+      </div>
     </div>
   </mat-card>
   <div class="flex-column">

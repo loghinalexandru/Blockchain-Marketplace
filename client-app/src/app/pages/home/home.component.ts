@@ -7,7 +7,8 @@ import Web3 from 'web3';
 import { NewProductData } from './new-product/new-product-data';
 import { NewProductDialog } from './new-product/new-product.dialog';
 import { NewManagerDialog } from './new-manager/new-manager.dialog';
-import { Product, ProductKeys } from './product/product';
+import { ProductKeys } from './product/product';
+import { NewBuyTokensDialog } from './tokens/new-buy-tokens.dialog';
 
 @Component({
   selector: 'app-home',
@@ -18,7 +19,8 @@ export class HomeComponent implements OnInit {
 
   public accounts = [];
   public products = [];
-  private contract;
+  private marketplace;
+  private tokens;
 
   constructor(
     private readonly w3s: Web3Service,
@@ -40,17 +42,38 @@ export class HomeComponent implements OnInit {
       });
     });
 
-    this.contract = this.contractsService.Marketplace;
-    const productCount = await this.contract.methods.getProductCount().call({ from: this.metaMaskService.user });
+    this.marketplace = this.contractsService.Marketplace;
+    this.tokens = this.contractsService.YetAnotherEthereumToken;
+
+    const productCount = await this.marketplace.methods.getProductCount().call({ from: this.metaMaskService.user });
 
     for (let i = 0; i < productCount; i++) {
-      const product = await this.contract.methods.getProduct(i).call({ from: this.metaMaskService.user });
+      const product = await this.marketplace.methods.getProduct(i).call({ from: this.metaMaskService.user });
       const p = ProductKeys.reduce((obj, key) => {
         obj[key] = product[key];
         return obj;
       }, {});
       this.products.push(p);
     }
+  }
+
+  public onBuyTokens(): void{
+    const dialogRef = this.dialog.open(NewBuyTokensDialog, {
+      width: "350px",
+      data: ""
+    });
+    dialogRef.afterClosed()
+      .subscribe((res: number) => {
+        if (res == undefined) {
+          alert("Invalid input");
+        }
+        this.tokens
+                  .methods
+                  .buyTokens(this.metaMaskService.user, res)
+                  .send({ from: this.metaMaskService.user })
+                  .then(res => console.log(res))
+                  .catch(err => console.log(err));
+      });
   }
 
   public onNewProduct(): void {
@@ -61,7 +84,7 @@ export class HomeComponent implements OnInit {
     dialogRef.afterClosed()
       .subscribe((res: NewProductData) => {
         if (res != undefined) {
-          this.contract
+          this.marketplace
             .methods
             .createProduct(res.description, res.developmentCost, res.evaluatorReward, res.expetise)
             .send({ from: this.metaMaskService.user })
@@ -82,7 +105,7 @@ export class HomeComponent implements OnInit {
           alert("Invalid name");
         }
 
-        this.contract
+        this.marketplace
           .methods
           .addManager(res)
           .send({ from: this.metaMaskService.user })
