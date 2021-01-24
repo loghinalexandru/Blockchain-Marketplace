@@ -44,6 +44,7 @@
     </div>
 
     <div>
-        <button *ngIf="canSubmit">Submit</button>
+        <button mat-raised-button color="primary" *ngIf="canSubmit"
+        (click)="onSubmit()">Submit</button>
     </div>
 </mat-card>

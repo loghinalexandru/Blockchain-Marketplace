@@ -37,7 +37,12 @@ export class ProductComponent implements OnInit {
     this.userService.userObservable().subscribe((user: Account) => this.zone.run(() => this.user = user));
   }
   async ngOnInit(): Promise<void> {
-    const freelancers: [] = await C_CALL(this.snackBar, this.contractsService.Marketplace, "getFreelancersPerProduct", [this.productIndex]);
+    let freelancers: [];
+    if (this.product.state == 1) {
+      freelancers = await C_CALL(this.snackBar, this.contractsService.Marketplace, "getFreelancersPerProduct", [this.productIndex]);
+    }else{
+      freelancers = await C_CALL(this.snackBar, this.contractsService.Marketplace, "getTeamPerProduct", [this.productIndex]);
+    }
     this.freelancers = freelancers.map((freelancer: []) => {
       const f = FreelancerKeys.reduce((obj, key) => {
         obj[key] = freelancer[key];
@@ -73,7 +78,9 @@ export class ProductComponent implements OnInit {
   }
 
   public get canSubmit(): boolean {
-    return this.product.state == 2 && this.user.isFreelancer;
+    return this.product.state == 2 
+    && this.user.isFreelancer 
+    && this.freelancers.findIndex(f => f.account.toLowerCase() == this.user.address.toLowerCase()) > -1;
   }
 
   public get canJoinAsEvaluator(): boolean {
@@ -137,6 +144,11 @@ export class ProductComponent implements OnInit {
       }
     });
     dialogRef.afterClosed()
-    .subscribe(_ => this.productNotifierService.notify(this.productIndex));
+      .subscribe(_ => this.productNotifierService.notify(this.productIndex));
+  }
+
+  public async onSubmit(): Promise<void> {
+    await C_TRANSACT(this.snackBar, this.contractsService.Marketplace, "notifyManager", [this.productIndex]);
+    await this.productNotifierService.notify(this.productIndex);
   }
 }

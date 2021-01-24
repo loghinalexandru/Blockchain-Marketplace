@@ -21,7 +21,7 @@ import { ViewApplicantsData } from "./view-applicants";
 })
 export class ViewApplicantsDialog {
 
-    public columnsToDisplay = ["account", "sum", "actions"];
+    public columnsToDisplay = ["account", "sum", "approved", "actions"];
     public expandedElement: Freelancer | null;
 
     constructor(
