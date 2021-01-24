@@ -52,6 +52,7 @@ contract Main {
         address payable account;
         uint256 sum;
         string expertise;
+        uint reputation;
         bool approved;
     }
     
@@ -170,10 +171,10 @@ contract Main {
 
     function changeProductState(uint256 productIndex) private {
 
-        if(_products[productIndex].remaining_funding == 0 && _products[productIndex].remaining_development_funding > 0){
+        if(_products[productIndex].remaining_funding == 0 && _products[productIndex].remaining_development_funding > 0 && _products[productIndex].state == State.Funding){
             _products[productIndex].state = State.Teaming;
         }
-        else if(_products[productIndex].remaining_development_funding == 0 && _products[productIndex].state == State.Teaming){
+        else if(_products[productIndex].remaining_development_funding == 0 && _products[productIndex].state == State.Teaming && _products[productIndex].evaluator != address(0)){
             _products[productIndex].state = State.Development;
         }
     }
@@ -265,7 +266,7 @@ contract Main {
         require(sum > 0);
         require(_applicationPerFreelancer[productIndex][msg.sender] == false);
 
-        _freelancersPerProduct[productIndex].push(Application(msg.sender, sum, _freelancers[msg.sender].expertise, false));
+        _freelancersPerProduct[productIndex].push(Application(msg.sender, sum, _freelancers[msg.sender].expertise, _freelancers[msg.sender].reputation, false));
         _applicationPerFreelancer[productIndex][msg.sender] = true;
         return true;
     }
@@ -274,6 +275,7 @@ contract Main {
         require(_products[productIndex].state == State.Teaming);
         require(_products[productIndex].evaluator == address(0));
         _products[productIndex].evaluator = msg.sender;
+        changeProductState(productIndex);
         return true;
     }
 
@@ -353,6 +355,10 @@ contract Main {
 
     function getProductState(uint256 index) public _productExists(index) view returns(State){
         return _products[index].state;
+    }
+
+    function getManager(address manager) public view returns(Manager memory){
+        return _managers[manager];
     }
 
     function getFreelancer(address freelancer) public view returns(Freelancer memory){
