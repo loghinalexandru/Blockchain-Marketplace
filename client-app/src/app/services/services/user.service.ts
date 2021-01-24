@@ -52,7 +52,6 @@ export class UserService {
             isManager: t_isManager,
             isFreelancer: t_isFreelancer
         };
-
         this._subject.next(this.user);
     }
 }

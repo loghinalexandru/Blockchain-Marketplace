@@ -1,4 +1,5 @@
 import { Injectable } from "@angular/core";
+import { Router } from "@angular/router";
 import { BehaviorSubject, Observable } from "rxjs";
 import { Web3Service } from "./web3.service";
 
@@ -9,7 +10,8 @@ export class MetaMaskService {
 
     private userHashSubject: BehaviorSubject<string> = new BehaviorSubject<string>("");
 
-    constructor(private readonly w3: Web3Service) {}
+    constructor(private readonly w3: Web3Service,
+        private readonly router: Router) { }
 
     public get isConnected(): boolean {
         return window['ethereum'].isConnected();
@@ -31,10 +33,23 @@ export class MetaMaskService {
                 .then(accs => {
                     this.w3.init();
                     this.userHashSubject.next(accs.result[0]);
-                    console.log("Connected user:", accs.result[0]);
+                    //console.log("Connected user:", accs.result[0]);
                     resolve(true);
                 })
                 .catch(err => { alert("please login"); resolve(false); });
+
+            window['ethereum']
+                .on('accountsChanged', (res, err) => {
+                    if (err === undefined) {
+                        this.w3.init();
+                        this.userHashSubject.next(res[0]);
+                        //console.log("Connected user:", res[0]);
+                        resolve(true);
+                    } else {
+                        alert("please login"); resolve(false);
+                        this.router.navigate(["connect"]);
+                    }
+                });
         });
     }
 

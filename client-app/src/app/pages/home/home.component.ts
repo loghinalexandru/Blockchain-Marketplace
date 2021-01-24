@@ -1,6 +1,6 @@
 import Web3 from 'web3';
 
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, NgZone, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { ContractsService } from 'src/app/services/services/contracts.service';
 import { NewProductData } from './new-product/new-product-data';
@@ -29,12 +29,14 @@ export class HomeComponent implements OnInit {
     private readonly contractsService: ContractsService,
     private readonly dialog: MatDialog,
     private readonly snackBar: MatSnackBar,
-    private readonly userService: UserService
+    private readonly userService: UserService,
+    private readonly zone: NgZone
   ) {
-    this.userService.userObservable().subscribe((user: Account) => this.user = user);
   }
 
   async ngOnInit(): Promise<void> {
+    this.userService.userObservable().subscribe((user: Account) => { this.zone.run(() => this.user = user); });
+
     const productCount = await C_CALL<number>(this.snackBar, this.contractsService.Marketplace, "getProductCount", []);
     for (let i = 0; i < productCount; i++) {
       await this.setProduct(i);

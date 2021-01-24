@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, Input, NgZone, OnInit } from '@angular/core';
 import { Account, UserService } from 'src/app/services/services/user.service';
 import { Product } from './product';
 
@@ -15,7 +15,7 @@ export class ProductComponent {
   public product: Product;
 
   constructor(private readonly userService: UserService) {
-    userService.userObservable().subscribe((user: Account) => this.user = user);
+    this.userService.userObservable().subscribe((user: Account) => this.user = user);
   }
 
   private states = {

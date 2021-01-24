@@ -27,7 +27,7 @@ export class ContractsService {
 
       this.marketplace = new this.w3.web3.eth.Contract
         (Marketplace["abi"] as AbiItem[], contracts.Main, { from: user });
-        
+
       this.updateSubject.next(user);
     });
   }
