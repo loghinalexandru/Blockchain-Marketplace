@@ -21,6 +21,8 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import {MatNativeDateModule} from '@angular/material/core';
 import { NewProductDialog } from './pages/home/new-product/new-product.dialog';
+import { NewManagerDialog } from './pages/home/new-manager/new-manager.dialog';
+import { ProductComponent } from './pages/home/product/product.component';
 
 
 @NgModule({
@@ -29,7 +31,9 @@ import { NewProductDialog } from './pages/home/new-product/new-product.dialog';
     ConnectComponent,
     HomeComponent,
     HeaderComponent,
-    NewProductDialog
+    NewProductDialog,
+    NewManagerDialog,
+    ProductComponent
   ],
   imports: [
     BrowserModule,

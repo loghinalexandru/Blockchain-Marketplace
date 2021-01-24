@@ -25,7 +25,7 @@ export class MetaMaskService {
             alert("Install metamask");
             return false;
         }
-        
+
         return await this.initMetamask();
     }
 
@@ -35,6 +35,7 @@ export class MetaMaskService {
                 .send('eth_requestAccounts')
                 .then(accs => {
                     this.userHash = accs.result[0];
+                    console.log("Connected user:", this.userHash);
                     this.w3.init();
                     resolve(true);
                 })

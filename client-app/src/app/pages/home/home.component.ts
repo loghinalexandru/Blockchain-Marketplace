@@ -6,6 +6,8 @@ import { Web3Service } from 'src/app/services/services/web3.service';
 import Web3 from 'web3';
 import { NewProductData } from './new-product/new-product-data';
 import { NewProductDialog } from './new-product/new-product.dialog';
+import { NewManagerDialog } from './new-manager/new-manager.dialog';
+import { Product, ProductKeys } from './product/product';
 
 @Component({
   selector: 'app-home',
@@ -15,7 +17,6 @@ import { NewProductDialog } from './new-product/new-product.dialog';
 export class HomeComponent implements OnInit {
 
   public accounts = [];
-
   public products = [];
   private contract;
 
@@ -39,35 +40,54 @@ export class HomeComponent implements OnInit {
 
     this.contract = this.contractsService.Marketplace;
     const productCount = await this.contract.methods.getProductCount().call({ from: this.metaMaskService.user });
-
-    this.contract.methods.getProduct(0).call({ from: this.metaMaskService.user })
-    .then(res => console.log(res))
-    .catch(err => console.log(err));
-
-    this.contract.methods.isManager().call({ from: this.metaMaskService.user })
-    .then(res => console.log(res))
-    .catch(err => console.log(err));
-
     console.log(productCount);
-    //.call({ from: this.metaMaskService.user });
+
+    for (let i = 0; i < productCount; i++) {
+      const product = await this.contract.methods.getProduct(i).call({ from: this.metaMaskService.user });
+      const p = ProductKeys.reduce((obj, key) => {
+        obj[key] = product[key];
+        return obj;
+      }, {});
+      this.products.push(p);
+    }
   }
 
-  public async onNewProduct(): Promise<void> {
+  public onNewProduct(): void {
     const dialogRef = this.dialog.open(NewProductDialog, {
       width: "350px",
       data: {}
     });
-    //(string calldata description, uint256 development_cost, uint256 evaluator_reward, string calldata expertise)
     dialogRef.afterClosed()
-      .subscribe(async (res: NewProductData) => {
+      .subscribe((res: NewProductData) => {
         if (res != undefined) {
           this.contract
             .methods
             .createProduct(res.description, res.developmentCost, res.evaluatorReward, res.expetise)
-            .call()
+            .send({ from: this.metaMaskService.user })
             .then(res => console.log(res))
             .catch(err => console.log(err));
         }
+      });
+  }
+
+  public onNewManager(): void {
+    const dialogRef = this.dialog.open(NewManagerDialog, {
+      width: "350px",
+      data: ""
+    });
+    dialogRef.afterClosed()
+      .subscribe((res: string) => {
+        if (res == undefined || res == "") {
+          alert("Invalid name");
+        }
+
+        this.contract
+          .methods
+          .addManager(res)
+          .send({ from: this.metaMaskService.user })
+          .then(res => console.log(res))
+          .catch(err => console.log(err));
+
       });
   }
 

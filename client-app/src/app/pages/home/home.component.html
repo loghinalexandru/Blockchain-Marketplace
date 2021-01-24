@@ -1,16 +1,23 @@
-<div class="container">
-  <div class="top">
-    <mat-card>
-      <mat-card-title>Welcome</mat-card-title>
-      <div *ngFor="let account of accounts">
-        <p class="body-1">Balance: {{ account.balance }}</p>
-        <p class="body-1">Hash: {{ account.account }}</p>
-      </div>
-    </mat-card>
-    
-    <button mat-raised-button color="primary" (click)="onNewProduct()">New product</button>
+<div class="top">
+  <mat-card>
+    <mat-card-title>Welcome</mat-card-title>
+    <div *ngFor="let account of accounts">
+      <p class="body-1">Balance: {{ account.balance }}</p>
+      <p class="body-1">Hash: {{ account.account }}</p>
+    </div>
+  </mat-card>
+  <div class="flex-column">
+    <button mat-raised-button
+      color="primary"
+      (click)="onNewProduct()">New product</button>
+    <button mat-raised-button
+      color="primary"
+      (click)="onNewManager()">Become a manager</button>
   </div>
+</div>
 
-  <div class="top">
-    stuff
+<div class="top">
+  <div *ngFor="let product of products">
+    <app-product [data]=product></app-product>
+  </div>
 </div>
