@@ -170,7 +170,7 @@ contract Main {
 
     function changeProductState(uint256 productIndex) private {
 
-        if(_products[productIndex].remaining_funding == 0){
+        if(_products[productIndex].remaining_funding == 0 && _products[productIndex].remaining_development_funding > 0){
             _products[productIndex].state = State.Teaming;
         }
         else if(_products[productIndex].remaining_development_funding == 0 && _products[productIndex].state == State.Teaming){
