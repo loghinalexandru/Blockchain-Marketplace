@@ -142,6 +142,7 @@ export class ProductComponent implements OnInit {
   public async onDelete(): Promise<void> {
     await C_TRANSACT(this.snackBar, this.contractsService.Marketplace, "deleteProduct", [this.productIndex]);
     await this.userService.notifyUserInfo();
+    await this.productNotifierService.notify(this.productIndex);
   }
 
   public onJoinFreelancer(): void {
