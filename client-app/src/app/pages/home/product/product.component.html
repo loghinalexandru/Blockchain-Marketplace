@@ -58,4 +58,17 @@
             Reject
         </button>
     </div>
+
+    <div *ngIf="canEvaluateProduct">
+        <button mat-raised-button 
+        (click)="onSubmitEvaluation(true)"
+        color="primary">
+            Accept
+        </button>
+        <button mat-raised-button 
+        (click)="onSubmitEvaluation(false)"
+        color="warn">
+            Reject
+        </button>
+    </div>
 </mat-card>

@@ -108,6 +108,12 @@ export class ProductComponent implements OnInit {
       this.product.manager.toLowerCase() == this.user.address.toLowerCase();
   }
 
+  public get canEvaluateProduct(): boolean {
+    return this.user.isEvaluator &&
+      this.product.state == 4 &&
+      this.product.evaluator.toLowerCase() == this.user.address.toLowerCase();
+  }
+
   public onFund(): void {
     const dialogRef = this.dialog.open(FundDialog, {
       data: {}
@@ -167,6 +173,11 @@ export class ProductComponent implements OnInit {
 
   public async onSubmitProduct(value:boolean): Promise<void> {
     await C_TRANSACT(this.snackBar, this.contractsService.Marketplace, "acceptProduct", [value, this.productIndex]);
+    await this.productNotifierService.notify(this.productIndex);
+  }
+
+  public async onSubmitEvaluation(value:boolean): Promise<void> {
+    await C_TRANSACT(this.snackBar, this.contractsService.Marketplace, "evaluateProduct", [value, this.productIndex]);
     await this.productNotifierService.notify(this.productIndex);
   }
 }
