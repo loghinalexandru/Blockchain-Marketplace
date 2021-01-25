@@ -301,8 +301,7 @@ contract Main {
             _managers[_products[productIndex].manager].reputation = increaseReputation(_managers[_products[productIndex].manager].reputation);
 
             for (uint i= 0; i< _teamPerProduct[productIndex].length; i++) {
-                Freelancer memory freelancer = _freelancers[_teamPerProduct[productIndex][i].account];
-                freelancer.reputation = increaseReputation(freelancer.reputation);
+                _freelancers[_teamPerProduct[productIndex][i].account].reputation = increaseReputation(_freelancers[_teamPerProduct[productIndex][i].account].reputation);
             }
 
             _products[productIndex].state = State.Done;
@@ -324,16 +323,14 @@ contract Main {
             _managers[_products[productIndex].manager].reputation = decreaseReputation(_managers[_products[productIndex].manager].reputation);
 
             for (uint i = 0; i < _teamPerProduct[productIndex].length; i++) {
-                Freelancer memory freelancer = _freelancers[_teamPerProduct[productIndex][i].account];
-                freelancer.reputation = increaseReputation(freelancer.reputation);
+                _freelancers[_teamPerProduct[productIndex][i].account].reputation = increaseReputation(_freelancers[_teamPerProduct[productIndex][i].account].reputation);
             }
 
             _products[productIndex].state = State.Done;
         }
         else{
             for (uint i = 0; i < _teamPerProduct[productIndex].length; i++) {
-                Freelancer memory freelancer = _freelancers[_teamPerProduct[productIndex][i].account];
-                freelancer.reputation = decreaseReputation(freelancer.reputation);
+                _freelancers[_teamPerProduct[productIndex][i].account].reputation = decreaseReputation(_freelancers[_teamPerProduct[productIndex][i].account].reputation);
             }
 
             //This works but _freelancersPerProduct keeps old reputation
