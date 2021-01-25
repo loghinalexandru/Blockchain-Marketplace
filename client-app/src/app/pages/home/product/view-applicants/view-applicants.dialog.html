@@ -38,7 +38,8 @@
                 [attr.colspan]="columnsToDisplay.length + 1">
                 <div class="app-element-detail"
                     [@detailExpand]="element == expandedElement ? 'expanded' : 'collapsed'">
-                    <div>Expertise:{{element.expertise}}</div>
+                    <div>Expertise: {{element.expertise}} </div>
+                    <div>Reputation: {{element.reputation}}</div>
                 </div>
             </td>
         </ng-container>

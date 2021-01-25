@@ -6,4 +6,4 @@ export interface Freelancer {
     reputation: number;
 }
 
-export const FreelancerKeys = ["account", "sum", "expertise", "approved", "reputation"];
+export const FreelancerKeys = ["account", "sum", "approved"];

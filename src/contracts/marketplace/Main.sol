@@ -51,8 +51,6 @@ contract Main {
     struct Application{
         address payable account;
         uint256 sum;
-        string expertise;
-        uint reputation;
         bool approved;
     }
     
@@ -265,7 +263,7 @@ contract Main {
         require(_applicationPerFreelancer[productIndex][msg.sender] == false, "Already applied for this product!");
         require(sum > 0);
 
-        _freelancersPerProduct[productIndex].push(Application(msg.sender, sum, _freelancers[msg.sender].expertise, _freelancers[msg.sender].reputation, false));
+        _freelancersPerProduct[productIndex].push(Application(msg.sender, sum, false));
         _applicationPerFreelancer[productIndex][msg.sender] = true;
         return true;
     }

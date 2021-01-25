@@ -43,6 +43,7 @@ export class ProductComponent implements OnInit {
     } else {
       freelancers = await C_CALL(this.snackBar, this.contractsService.Marketplace, "getTeamPerProduct", [this.productIndex]);
     }
+
     this.freelancers = freelancers.map((freelancer: []) => {
       const f = FreelancerKeys.reduce((obj, key) => {
         obj[key] = freelancer[key];
@@ -50,6 +51,12 @@ export class ProductComponent implements OnInit {
       }, {}) as Freelancer;
       return f;
     });
+
+    for(let entry of this.freelancers){
+      var freelancerDetails = await C_CALL(this.snackBar, this.contractsService.Marketplace, "getFreelancer", [entry.account]);
+      entry.expertise = freelancerDetails["expertise"]
+      entry.reputation = freelancerDetails["reputation"]
+    }
   }
 
   private states = {
