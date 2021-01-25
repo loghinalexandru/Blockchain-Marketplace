@@ -195,10 +195,9 @@ contract Main {
                 _token.transfer(_fundersPerProduct[productIndex][_products[productIndex].funders[i]].account, _fundersPerProduct[productIndex][_products[productIndex].funders[i]].amount);
             }
         }
-        
+
+        _products[productIndex].exists = false;
         emit ProductDeleted(productIndex);
-        _productCount = _productCount - 1;
-        delete _products[productIndex];
 
         return true;
     }
@@ -243,7 +242,7 @@ contract Main {
         return _token.transferFrom(msg.sender, address(this), amount);
     }
 
-    function notifyManager(uint256 productIndex)public _productExists(productIndex) _isInTeam(productIndex) _productExists(productIndex) returns(bool){
+    function notifyManager(uint256 productIndex)public _productExists(productIndex) _isInTeam(productIndex) returns(bool){
         require(_products[productIndex].state == State.Development, "Product needs to be in development stage!");
         _products[productIndex].state = State.ManagerApproval;
         emit NotifyManager(productIndex, msg.sender);
@@ -263,8 +262,8 @@ contract Main {
     function applyForProduct(uint256 productIndex, uint256 sum) public _productExists(productIndex) _isFreelancer returns(bool){
         require(_products[productIndex].state == State.Teaming);
         require(_products[productIndex].development_cost >= sum);
+        require(_applicationPerFreelancer[productIndex][msg.sender] == false, "Already applied for this product!");
         require(sum > 0);
-        require(_applicationPerFreelancer[productIndex][msg.sender] == false);
 
         _freelancersPerProduct[productIndex].push(Application(msg.sender, sum, _freelancers[msg.sender].expertise, _freelancers[msg.sender].reputation, false));
         _applicationPerFreelancer[productIndex][msg.sender] = true;
@@ -337,6 +336,7 @@ contract Main {
                 freelancer.reputation = decreaseReputation(freelancer.reputation);
             }
 
+            //This works but _freelancersPerProduct keeps old reputation
             _products[productIndex].state = State.Teaming;
             _products[productIndex].remaining_development_funding = _products[productIndex].development_cost;
             delete _teamPerProduct[productIndex];
@@ -349,11 +349,11 @@ contract Main {
         return _token.balanceOf(owner);
     }
 
-    function getProduct(uint256 index) public _productExists(index) view returns(Product memory){
+    function getProduct(uint256 index) public view returns(Product memory){
         return _products[index];
     }
 
-    function getProductState(uint256 index) public _productExists(index) view returns(State){
+    function getProductState(uint256 index) public view returns(State){
         return _products[index].state;
     }
 
@@ -382,7 +382,7 @@ contract Main {
         return _teamPerProduct[productIndex];
     }
 
-    function getFundersPerProduct(uint256 productIndex)public _productExists(productIndex) view returns(address payable[] memory){
+    function getFundersPerProduct(uint256 productIndex)public view returns(address payable[] memory){
         return _products[productIndex].funders;
     }
     
