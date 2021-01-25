@@ -186,11 +186,13 @@ export class ProductComponent implements OnInit {
 
   public async onSubmitProduct(value:boolean): Promise<void> {
     await C_TRANSACT(this.snackBar, this.contractsService.Marketplace, "acceptProduct", [value, this.productIndex]);
+    await this.userService.notifyUserInfo();
     await this.productNotifierService.notify(this.productIndex);
   }
 
   public async onSubmitEvaluation(value:boolean): Promise<void> {
     await C_TRANSACT(this.snackBar, this.contractsService.Marketplace, "evaluateProduct", [value, this.productIndex]);
+    await this.userService.notifyUserInfo();
     await this.productNotifierService.notify(this.productIndex);
   }
 }
