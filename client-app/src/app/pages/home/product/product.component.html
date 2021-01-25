@@ -23,6 +23,10 @@
                 (click)="onFund()"
                 mat-raised-button
                 color="accent">Fund</button>
+            <button *ngIf="canDeleteProduct"
+                (click)="onDelete()"
+                mat-raised-button
+                color="warn">Delete</button>
         </div>
     </div>
 

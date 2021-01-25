@@ -108,6 +108,12 @@ export class ProductComponent implements OnInit {
       this.product.manager.toLowerCase() == this.user.address.toLowerCase();
   }
 
+  public get canDeleteProduct(): boolean {
+    return this.user.isManager &&
+      this.product.state == 0 &&
+      this.product.manager.toLowerCase() == this.user.address.toLowerCase();
+  }
+
   public get canEvaluateProduct(): boolean {
     return this.user.isEvaluator &&
       this.product.state == 4 &&
@@ -130,6 +136,10 @@ export class ProductComponent implements OnInit {
         await this.productNotifierService.notify(this.productIndex);
       }
     })
+  }
+
+  public async onDelete(): Promise<void> {
+    await C_TRANSACT(this.snackBar, this.contractsService.Marketplace, "deleteProduct", [this.productIndex]);
   }
 
   public onJoinFreelancer(): void {
