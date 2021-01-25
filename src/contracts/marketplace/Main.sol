@@ -178,13 +178,15 @@ contract Main {
     }
     //POST
     function createProduct(string calldata description, uint256 development_cost, uint256 evaluator_reward, string calldata expertise) public _isManager returns(bool){
+        require(development_cost > 0);
+        require(evaluator_reward > 0);
         _products[_productCount] = Product(description, State.Funding, development_cost, evaluator_reward, development_cost.add(evaluator_reward), development_cost, expertise, msg.sender, address(0), new address payable[](0), false, true);
         emit ProductAdded(_productCount);
         _productCount = _productCount + 1;
         return true;
     }
 
-    function deleteProduct(uint256 productIndex) public _isManager returns(bool){
+    function deleteProduct(uint256 productIndex) public _isManager _productExists(productIndex) returns(bool){
         require(_products[productIndex].state == State.Funding);
         require(_products[productIndex].manager == msg.sender);
 
