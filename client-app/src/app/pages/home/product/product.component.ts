@@ -95,7 +95,7 @@ export class ProductComponent implements OnInit {
   }
 
   public get canFund(): boolean {
-    return this.product.state == 0;
+    return this.product.state == 0 && this.product.exists;
   }
 
   public get canViewApplicants(): boolean {
@@ -111,6 +111,7 @@ export class ProductComponent implements OnInit {
   public get canDeleteProduct(): boolean {
     return this.user.isManager &&
       this.product.state == 0 &&
+      this.product.exists &&
       this.product.manager.toLowerCase() == this.user.address.toLowerCase();
   }
 
@@ -140,6 +141,7 @@ export class ProductComponent implements OnInit {
 
   public async onDelete(): Promise<void> {
     await C_TRANSACT(this.snackBar, this.contractsService.Marketplace, "deleteProduct", [this.productIndex]);
+    await this.userService.notifyUserInfo();
   }
 
   public onJoinFreelancer(): void {

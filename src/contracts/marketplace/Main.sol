@@ -35,7 +35,7 @@ contract Main {
 
     struct Evaluator {
         string name;
-        uint sum;
+        uint reputation;
         address payable account;
         string expertise;
         bool exists;

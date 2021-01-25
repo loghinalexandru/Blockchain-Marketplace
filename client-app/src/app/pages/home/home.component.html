@@ -1,9 +1,14 @@
 <div class="top">
   <mat-card>
-    <mat-card-title>Welcome {{role}}</mat-card-title>
+    <mat-card-title>Welcome {{user.name}}</mat-card-title>
     <div>
       <p class="body-1">Balance: {{ user.balance }}</p>
       <p class="body-1">Address: {{ user.address }}</p>
+      <div *ngIf="user.expertise">
+        <p class="body-1">Expertise: {{ user.expertise }}</p>
+      </div>
+      <p class="body-1">Reputation: {{ user.reputation }}</p>
+      <p class="body-1">Role: {{ role }}</p>
       <div>
         <div class="top slim">
           <p class="body-1">Tokens: {{ user.tokens }}</p>
@@ -71,7 +76,7 @@
     <div class="top">
       <div *ngFor="let product of products; index as i"
         class="margin">
-        <app-product *ngIf="product.state == group.value"
+        <app-product *ngIf="product.state == group.value && product.exists"
           [product]=product
           [productIndex]=i></app-product>
       </div>

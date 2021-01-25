@@ -13,7 +13,7 @@ import contracts from "@assets/contracts.json"
 export class UserService {
     private user: Account;
     private readonly _subject: BehaviorSubject<Account> = new BehaviorSubject<Account>(
-        { address: "", allowance: 0, balance: "0", tokens: 0, isEvaluator: false, isFreelancer: false, isManager: false });
+        { address: "", allowance: 0, name: "", reputation: 0, expertise: "", balance: "0", tokens: 0, isEvaluator: false, isFreelancer: false, isManager: false });
 
     constructor(
         private readonly w3s: Web3Service,
@@ -41,12 +41,19 @@ export class UserService {
         const t_allowance = await C_CALL<number>(this.snackBar, this.contractsService.YetAnotherEthereumToken, "allowance", [t_address, contracts.Main]);
         const t_isManager = await C_CALL<boolean>(this.snackBar, this.contractsService.Marketplace, "isManager", []);
         const t_isFreelancer = await C_CALL<boolean>(this.snackBar, this.contractsService.Marketplace, "isFreelancer", []);
-        const t_isEvaluator = await C_CALL<boolean>(this.snackBar, this.contractsService.Marketplace, "isEvaluator", []);;
-        
+        const t_isEvaluator = await C_CALL<boolean>(this.snackBar, this.contractsService.Marketplace, "isEvaluator", []);
+
+        const expertiseFunc = t_isFreelancer == true ? "getFreelancer" : t_isManager ? "getManager" : "getEvaluator";
+        const t_role = await C_CALL<string>(this.snackBar, this.contractsService.Marketplace, expertiseFunc, [t_address]);
+        const role = mapRole(RoleKeys, t_role);
+
         this.user = {
+            name: role.name,
             address: t_address,
             balance: t_balance,
             tokens: t_tokens,
+            expertise: role.expertise,
+            reputation: role.reputation,
             allowance: t_allowance,
             isEvaluator: t_isEvaluator,
             isManager: t_isManager,
@@ -57,11 +64,28 @@ export class UserService {
 }
 
 export interface Account {
+    name: string;
     balance: string;
     address: string;
     tokens: number;
+    reputation: number;
+    expertise: string;
     allowance: number;
     isManager: boolean;
     isFreelancer: boolean;
     isEvaluator: boolean;
+}
+
+export interface Role {
+    expertise: string;
+    reputation: number;
+    name: string;
+}
+
+export const RoleKeys = [
+    "expertise", "name", "reputation"
+]
+
+function mapRole(arr: string[], input): Role {
+    return arr.reduce((obj, key) => { obj[key] = input[key]; return obj; }, {}) as Role;
 }
