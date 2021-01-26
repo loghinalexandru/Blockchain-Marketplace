@@ -43,5 +43,6 @@ export class ViewApplicantsDialog {
     public async onAccept(freelancer: Freelancer): Promise<void> {
         const index = this.data.freelancers.findIndex(f => f.account == freelancer.account);
         await C_TRANSACT(this.snackBar, this.contracts.Marketplace, "chooseFreelancer", [this.data.productIndex, index]);
+        this.data.freelancers[index].approved = true;
     }
 }
