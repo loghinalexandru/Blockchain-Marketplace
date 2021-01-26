@@ -1,0 +1,1 @@
+ganache-cli --db="saves/" -i="5777" -d --mnemonic="bundle crawl devote shoot wave absurd please glide song mad gold innocent"
