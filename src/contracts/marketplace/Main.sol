@@ -273,6 +273,7 @@ contract Main {
     function applyForProductEvaluation(uint256 productIndex) public _isEvaluator _productExists(productIndex) returns(bool){
         require(_products[productIndex].state == State.Teaming);
         require(_products[productIndex].evaluator == address(0));
+        require(keccak256(bytes(_evaluators[msg.sender].expertise)) == keccak256(bytes(_products[productIndex].expertise)), "You do not have the expertise to evaluate this product!");
         _products[productIndex].evaluator = msg.sender;
         changeProductState(productIndex);
         return true;

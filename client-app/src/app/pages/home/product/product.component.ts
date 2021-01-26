@@ -91,7 +91,7 @@ export class ProductComponent implements OnInit {
   }
 
   public get canJoinAsEvaluator(): boolean {
-    return this.product.evaluator === "0x0000000000000000000000000000000000000000" && this.product.state == 1 && this.user.isEvaluator;
+    return this.product.evaluator === "0x0000000000000000000000000000000000000000" && this.product.state == 1 && this.user.isEvaluator && this.product.expertise == this.user.expertise;
   }
 
   public get canFund(): boolean {
